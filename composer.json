@@ -1,0 +1,35 @@
+{
+    "name": "hirbod-codes/theclinic",
+    "type": "project",
+    "description": "The Laravel Framework.",
+    "authors": [
+        {
+            "name": "Hirbod Khatami",
+            "email": "hirbod.khatami.words@gmail.com"
+        }
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^8.0",
+        "laravel/helpers": ">=1.0",
+        "illuminate/support": ">=1.0"
+    },
+    "require-dev": {
+        "mockery/mockery": "dev-master",
+        "fakerphp/faker": "^1.15",
+        "phpunit/phpunit": "9.5",
+        "orchestra/testbench": "6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "TheClinic\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "Tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
