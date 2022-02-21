@@ -3,36 +3,27 @@
 namespace TheClinic\DataStructures\Order;
 
 use TheClinic\DataStructures\User\DSUser;
-use TheClinic\DataStructures\Order\DSParts;
-use TheClinic\DataStructures\Order\DSPackages;
 use TheClinic\DataStructures\Visit\DSVisits;
-use TheClinic\Exceptions\DataStructures\Order\InvalidGenderException;
 
 class DSOrder
 {
-    private int $id;
+    protected int $id;
 
-    private DSUser $user;
+    protected DSUser $user;
 
-    private DSParts $parts;
+    protected int $price;
 
-    private DSPackages $packages;
+    protected int $neededTime;
 
     public DSVisits|null $visits;
 
-    private int $price;
+    protected \DateTime $createdAt;
 
-    private int $neededTime;
-
-    private \DateTime $createdAt;
-
-    private \DateTime $updatedAt;
+    protected \DateTime $updatedAt;
 
     public function __construct(
         int $id,
         DSUser $user,
-        DSParts $parts,
-        DSPackages $packages,
         ?DSVisits $visits = null,
         int $price,
         int $neededTime,
@@ -41,8 +32,6 @@ class DSOrder
     ) {
         $this->id = $id;
         $this->user = $user;
-        $this->setParts($parts);
-        $this->setPackages($packages);
         $this->visits = $visits;
         $this->price = $price;
         $this->neededTime = $neededTime;
@@ -68,38 +57,6 @@ class DSOrder
     public function setUser(DSUser $user): void
     {
         $this->user = $user;
-    }
-
-    public function getParts(): DSParts
-    {
-        return $this->parts;
-    }
-
-    public function setParts(DSParts $parts): void
-    {
-        if ((isset($this->packages) && $this->packages->getGender() !== $parts->getGender()) ||
-            ($parts->getGender() !== $this->user->getGender())
-        ) {
-            throw new InvalidGenderException("Parts gender doesn't match with this data structures' order or package gender.", 500);
-        }
-
-        $this->parts = $parts;
-    }
-
-    public function getPackages(): DSPackages
-    {
-        return $this->packages;
-    }
-
-    public function setPackages(DSPackages $packages): void
-    {
-        if ((isset($this->parts) && $packages->getGender() !== $this->parts->getGender()) ||
-            ($packages->getGender() !== $this->user->getGender())
-        ) {
-            throw new InvalidGenderException("Packages gender doesn't match with this data structures' order or part gender.", 500);
-        }
-
-        $this->packages = $packages;
     }
 
     public function getPrice(): int
