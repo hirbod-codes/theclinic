@@ -15,17 +15,24 @@ class DSOrders implements \ArrayAccess, \Iterator, \Countable
 
     public DSUser|null $user;
 
-    /**
-     * @var \TheClinic\DataStructures\Order\DSOrder[]
-     */
-    private array $orders;
+    protected array $orders;
 
-    private int $position;
+    protected string $orderType = DSOrder::class;
 
-    public function __construct(DSUser|null $user = null)
+    protected bool $mixedOrders;
+
+    protected int $position;
+
+    public function __construct(DSUser|null $user = null, bool $mixedOrders = false)
     {
+        $this->mixedOrders = $mixedOrders;
         $this->user = $user;
         $this->position = 0;
+    }
+
+    public function isMixedOrders(): bool
+    {
+        return $this->mixedOrders;
     }
 
     // -------------------- \ArrayAccess
@@ -50,11 +57,12 @@ class DSOrders implements \ArrayAccess, \Iterator, \Countable
             throw new InvalidOffsetTypeException("This data structure only accepts integer and null as an offset type.", 500);
         }
 
-        if (!($value instanceof DSOrder)) {
-            throw new InvalidValueTypeException("This data structure only accepts the type: " . DSOrder::class . " as an array member.", 500);
+        if (!($value instanceof $this->orderType)) {
+            throw new InvalidValueTypeException("This data structure only accepts the type: " . $this->orderType . " as an array member.", 500);
         }
 
-        if (isset($this->user) && !is_null($this->user) && $this->user->getId() !== $value->user->getId()) {
+        /** @var object $value */
+        if (isset($this->user) && !is_null($this->user) && $this->user->getId() !== $value->getUser()->getId()) {
             throw new InvalidUserException("The members of this data structure must belong to the same specified user. Mismatched member id: " . $value->getId(), 500);
         }
 
@@ -114,6 +122,4 @@ class DSOrders implements \ArrayAccess, \Iterator, \Countable
     {
         return count($this->orders);
     }
-
-    // ------------------------------------------------------------------------------------
 }
