@@ -5,9 +5,12 @@ namespace TheClinic\DataStructures\User;
 use TheClinic\DataStructures\Order\DSOrders;
 use TheClinic\DataStructures\Visit\DSVisits;
 use TheClinic\DataStructures\User\IUserRule;
+use TheClinic\DataStructures\User\ICheckAuthentication;
 
 class DSUser
 {
+    private ICheckAuthentication $iCheckAuthentication;
+
     private IUserRule $role;
 
     private int $id;
@@ -29,6 +32,7 @@ class DSUser
     private \DateTime $updatedAt;
 
     public function __construct(
+        ICheckAuthentication $iCheckAuthentication,
         IUserRule $role,
         int $id,
         string $firstname,
@@ -40,6 +44,7 @@ class DSUser
         \DateTime $createdAt,
         \DateTime $updatedAt,
     ) {
+        $this->iCheckAuthentication = $iCheckAuthentication;
         $this->role = $role;
         $this->id = $id;
         $this->firstname = $firstname;
@@ -50,6 +55,11 @@ class DSUser
         $this->orders = $orders;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
+    }
+
+    public function isAuthenticated(): bool
+    {
+        return $this->iCheckAuthentication->isAuthenticated();
     }
 
     public function getRole(): IUserRule
