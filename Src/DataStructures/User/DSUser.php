@@ -4,9 +4,12 @@ namespace TheClinic\DataStructures\User;
 
 use TheClinic\DataStructures\Order\DSOrders;
 use TheClinic\DataStructures\Visit\DSVisits;
+use TheClinic\DataStructures\User\IUserRule;
 
-class DSUser implements IUserRule
+class DSUser
 {
+    private IUserRule $role;
+
     private int $id;
 
     private string $firstname;
@@ -26,6 +29,7 @@ class DSUser implements IUserRule
     private \DateTime $updatedAt;
 
     public function __construct(
+        IUserRule $role,
         int $id,
         string $firstname,
         string $lastname,
@@ -36,6 +40,7 @@ class DSUser implements IUserRule
         \DateTime $createdAt,
         \DateTime $updatedAt,
     ) {
+        $this->role = $role;
         $this->id = $id;
         $this->firstname = $firstname;
         $this->lastname = $lastname;
@@ -45,6 +50,16 @@ class DSUser implements IUserRule
         $this->orders = $orders;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
+    }
+
+    public function getRole(): IUserRule
+    {
+        return $this->role;
+    }
+
+    public function setRole(IUserRule $role): void
+    {
+        $this->role = $role;
     }
 
     public function getId(): int
