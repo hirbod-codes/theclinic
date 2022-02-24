@@ -4,7 +4,7 @@ namespace Tests\DataStructures\Order;
 
 use Faker\Factory;
 use Faker\Generator;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Order\DSPart;
 
 class DSPartTest extends TestCase
@@ -13,13 +13,14 @@ class DSPartTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 
     public function testDataStructure(): void
     {
         $faker = $this->faker;
-        
+
         $id = $faker->numberBetween(1, 100);
         $gender = $faker->randomElement(["Male", "Female"]);
         $name = $faker->name($gender);

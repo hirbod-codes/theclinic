@@ -5,7 +5,7 @@ namespace Tests\Visit;
 use Faker\Factory;
 use Faker\Generator;
 use Mockery;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use Tests\Fakers\Time\DSDownTimesFaker;
 use TheClinic\DataStructures\Time\DSDownTime;
 use TheClinic\DataStructures\Time\DSDownTimes;
@@ -21,6 +21,7 @@ class SearchingBetweenDownTimesTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 

@@ -5,7 +5,7 @@ namespace Tests\DataStructures\Time;
 use Faker\Factory;
 use Faker\Generator;
 use Mockery;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Time\DSDownTime;
 use TheClinic\DataStructures\Time\DSDownTimes;
 
@@ -15,6 +15,7 @@ class DSDownTimesTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 
@@ -64,7 +65,7 @@ class DSDownTimesTest extends TestCase
 
         foreach ($downTimes as $dsDownTime) {
             $this->assertInstanceOf(DSDownTime::class, $dsDownTime);
-            
+
             $dsDownTimes[] = $dsDownTime;
         }
 

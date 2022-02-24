@@ -4,7 +4,7 @@ namespace Tests\DataStructures\Time;
 
 use Faker\Factory;
 use Faker\Generator;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Time\DSTimePeriod;
 use TheClinic\Exceptions\DataStructures\Time\TimeSequenceViolationException;
 
@@ -14,6 +14,7 @@ class DSTimePeriodTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 
@@ -29,14 +30,14 @@ class DSTimePeriodTest extends TestCase
 
         try {
             $dsTimePeriod->setStart("16:00:00");
-            
+
             throw new \LogicException("The data structure failed to satisfy it's time order.", 500);
         } catch (TimeSequenceViolationException $th) {
         }
 
         try {
             $dsTimePeriod->setEnd("09:00:00");
-            
+
             throw new \LogicException("The data structure failed to satisfy it's time order.", 500);
         } catch (TimeSequenceViolationException $th) {
         }

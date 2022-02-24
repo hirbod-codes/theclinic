@@ -5,7 +5,7 @@ namespace Tests\DataStructures\Time;
 use Faker\Factory;
 use Faker\Generator;
 use Mockery;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Time\DSTimePeriods;
 use TheClinic\DataStructures\Time\DSWeekDaysPeriods;
 
@@ -15,6 +15,7 @@ class DSWeekDaysPeriodsTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 

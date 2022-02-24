@@ -4,7 +4,7 @@ namespace Tests\Visit;
 
 use Faker\Factory;
 use Faker\Generator;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Visit\DSVisit;
 use TheClinic\DataStructures\Visit\DSVisits;
 use TheClinic\Visit\Utilities\SearchingBetweenTimeRange;
@@ -15,6 +15,7 @@ class SearchingBetweenTimeRangeTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 

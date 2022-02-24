@@ -6,7 +6,7 @@ use Faker\Factory;
 use Faker\Generator;
 use Mockery;
 use Mockery\MockInterface;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Time\DSTimePeriod;
 use TheClinic\DataStructures\Time\DSTimePeriods;
 
@@ -16,6 +16,7 @@ class DSTimePeriodsTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 
@@ -73,7 +74,7 @@ class DSTimePeriodsTest extends TestCase
         $counter = 0;
         foreach ($dsTimePeriods as $dsTimePeriod) {
             $this->assertInstanceOf(DSTimePeriod::class, $dsTimePeriod);
-            
+
             $counter++;
         }
 

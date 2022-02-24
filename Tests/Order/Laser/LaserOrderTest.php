@@ -5,7 +5,7 @@ namespace Tests\Order\Laser;
 use Faker\Factory;
 use Faker\Generator;
 use Mockery;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Order\DSPackages;
 use TheClinic\DataStructures\Order\DSParts;
 use TheClinic\Exceptions\Order\InvalidGenderException;
@@ -28,6 +28,7 @@ class LaserOrderTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
 
         $gender = "Male";

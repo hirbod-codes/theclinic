@@ -5,7 +5,7 @@ namespace TheClinic\Tests\DataStructures\Visit;
 use Faker\Factory;
 use Faker\Generator;
 use Mockery;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Visit\DSVisit;
 use TheClinic\DataStructures\Visit\DSVisits;
 use TheClinic\Exceptions\DataStructures\Visit\VisitExceptions;
@@ -16,6 +16,7 @@ class DSVisitsTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 

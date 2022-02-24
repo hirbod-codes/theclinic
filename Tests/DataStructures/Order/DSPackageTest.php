@@ -5,7 +5,7 @@ namespace Tests\DataStructures\Order;
 use Faker\Factory;
 use Faker\Generator;
 use Mockery;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Order\DSPackage;
 use TheClinic\DataStructures\Order\DSParts;
 use TheClinic\Exceptions\DataStructures\Order\OrderExceptions;
@@ -16,6 +16,7 @@ class DSPackageTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 
@@ -70,8 +71,7 @@ class DSPackageTest extends TestCase
         DSParts $parts,
         \DateTime $createdAt,
         \DateTime $updatedAt
-    ): void 
-    {
+    ): void {
         $dsPart = new DSPackage(
             $id,
             $name,

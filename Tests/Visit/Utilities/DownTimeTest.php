@@ -4,7 +4,7 @@ namespace Tests\Visit\Utilities;
 
 use Faker\Factory;
 use Faker\Generator;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use Tests\Fakers\Time\DSDownTimesFaker;
 use TheClinic\DataStructures\Time\DSDownTime;
 use TheClinic\DataStructures\Time\DSDownTimes;
@@ -16,6 +16,7 @@ class DownTimeTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 

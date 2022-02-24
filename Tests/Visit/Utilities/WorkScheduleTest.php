@@ -4,7 +4,7 @@ namespace Tests\Visit\Utilities;
 
 use Faker\Factory;
 use Faker\Generator;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use Tests\Fakers\Time\DSWorkScheduleFaker;
 use TheClinic\DataStructures\Time\DSWorkSchedule;
 use TheClinic\Visit\Utilities\WorkSchedule;
@@ -15,6 +15,7 @@ class WorkScheduleTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 

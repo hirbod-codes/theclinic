@@ -4,7 +4,7 @@ namespace Tests\DataStructures\Time;
 
 use Faker\Factory;
 use Faker\Generator;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Time\DSDateTimePeriod;
 use TheClinic\Exceptions\DataStructures\Time\TimeSequenceViolationException;
 
@@ -14,6 +14,7 @@ class DSDateTimePeriodTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 

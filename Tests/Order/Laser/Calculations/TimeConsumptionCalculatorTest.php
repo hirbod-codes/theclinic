@@ -4,7 +4,7 @@ namespace Tests\Order\Laser\Calculations;
 
 use Faker\Factory;
 use Faker\Generator;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use Tests\Fakers\Order\DSPackageFaker;
 use Tests\Fakers\Order\DSPackagesFaker;
 use Tests\Fakers\Order\DSPartFaker;
@@ -17,6 +17,7 @@ class TimeConsumptionCalculatorTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
 
         $gender = "Male";

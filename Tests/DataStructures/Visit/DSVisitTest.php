@@ -5,7 +5,7 @@ namespace TheClinic\Tests\DataStructures\Visit;
 use Faker\Factory;
 use Faker\Generator;
 use Mockery;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Order\DSOrder;
 use TheClinic\DataStructures\User\DSUser;
 use TheClinic\DataStructures\Visit\DSVisit;
@@ -16,6 +16,7 @@ class DSVisitTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 
@@ -50,7 +51,7 @@ class DSVisitTest extends TestCase
             $updatedAt,
         );
 
-        $this->assertEquals($dsVisit->getId(), $id);        
+        $this->assertEquals($dsVisit->getId(), $id);
         $this->assertEquals($dsVisit->user->getId(), $user->getId());
         $this->assertEquals($dsVisit->order->getId(), $order->getId());
 

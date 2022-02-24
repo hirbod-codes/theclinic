@@ -5,7 +5,7 @@ namespace Tests\DataStructures\Order;
 use Faker\Factory;
 use Faker\Generator;
 use Mockery;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use TheClinic\DataStructures\Order\DSPackage;
 use TheClinic\DataStructures\Order\DSPackages;
 use TheClinic\Exceptions\DataStructures\Order\InvalidGenderException;
@@ -16,6 +16,7 @@ class DSPackagesTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->faker = Factory::create();
     }
 
