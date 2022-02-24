@@ -18,13 +18,13 @@ class LaserOrderTest extends TestCase
 {
     private Generator $faker;
 
-    private DSParts|Mockery\MockInterface $parts;
+    private DSParts $parts;
 
-    private DSPackages|Mockery\MockInterface $packages;
+    private DSPackages $packages;
 
-    private ILaserPriceCalculator|Mockery\MockInterface $laserPriceCalculator;
+    private ILaserPriceCalculator $laserPriceCalculator;
 
-    private ILaserTimeConsumptionCalculator|Mockery\MockInterface $laserTimeConsumptionCalculator;
+    private ILaserTimeConsumptionCalculator $laserTimeConsumptionCalculator;
 
     protected function setUp(): void
     {
@@ -33,66 +33,60 @@ class LaserOrderTest extends TestCase
 
         $gender = "Male";
 
+        /** @var \TheClinic\DataStructures\Order\DSParts|\Mockery\MockInterface $parts */
         $this->parts = Mockery::mock(DSParts::class);
         $this->parts->shouldReceive("getGender")->andReturn($gender);
 
+        /** @var \TheClinic\DataStructures\Order\DSPackages|\Mockery\MockInterface $packages */
         $this->packages = Mockery::mock(DSPackages::class);
         $this->packages->shouldReceive("getGender")->andReturn($gender);
 
+        /** @var \TheClinic\Order\Laser\ILaserPriceCalculator|\Mockery\MockInterface $laserPriceCalculator */
         $this->laserPriceCalculator = Mockery::mock(ILaserPriceCalculator::class);
         $this->laserPriceCalculator->shouldReceive("calculate")->with($this->parts, $this->packages)->andReturn(1);
         $this->laserPriceCalculator->shouldReceive("calculateWithoutDiscount")->with($this->parts, $this->packages)->andReturn(1);
 
+        /** @var \TheClinic\Order\Laser\ILaserTimeConsumptionCalculator|\Mockery\MockInterface $laserTimeConsumptionCalculator */
         $this->laserTimeConsumptionCalculator = Mockery::mock(ILaserTimeConsumptionCalculator::class);
         $this->laserTimeConsumptionCalculator->shouldReceive("calculate")->with($this->parts, $this->packages)->andReturn(1);
     }
 
-    public function testLaserOrder(): void
+    public function testLaserOrderCalculatePrice(): void
     {
-        $laserOrder = new LaserOrder($this->parts, $this->packages, $this->laserPriceCalculator, $this->laserTimeConsumptionCalculator);
-        $this->assertInstanceOf(LaserOrder::class, $laserOrder);
+        $laserOrder = new LaserOrder;
+        $result = $laserOrder->calculatePrice($this->parts, $this->packages, $this->laserPriceCalculator);
 
-        $laserOrder = new LaserOrder(null, $this->packages, $this->laserPriceCalculator, $this->laserTimeConsumptionCalculator);
-        $this->assertInstanceOf(LaserOrder::class, $laserOrder);
+        $this->assertIsInt($result);
 
         try {
-            new LaserOrder(null, null, $this->laserPriceCalculator, $this->laserTimeConsumptionCalculator);
-
+            (new LaserOrder)->calculatePrice(null, null, $this->laserPriceCalculator);
             throw new \RuntimeException("Failure!!!", 500);
         } catch (NoPackageOrPartException $th) {
         }
 
+        /** @var \TheClinic\DataStructures\Order\DSParts|\Mockery\MockInterface $parts */
         $this->parts = Mockery::mock(DSParts::class);
         $this->parts->shouldReceive("getGender")->andReturn("Female");
 
         try {
-            new LaserOrder($this->parts, $this->packages, $this->laserPriceCalculator, $this->laserTimeConsumptionCalculator);
-
+            (new LaserOrder)->calculatePrice($this->parts, $this->packages, $this->laserPriceCalculator);
             throw new \RuntimeException("Failure!!!", 500);
         } catch (InvalidGenderException $th) {
         }
     }
 
-    public function testLaserOrderCalculatePrice(): void
-    {
-        $laserOrder = new LaserOrder($this->parts, $this->packages, $this->laserPriceCalculator, $this->laserTimeConsumptionCalculator);
-        $result = $laserOrder->calculatePrice();
-
-        $this->assertIsInt($result);
-    }
-
     public function testLaserOrderCalculatePriceWithoutDiscount(): void
     {
-        $laserOrder = new LaserOrder($this->parts, $this->packages, $this->laserPriceCalculator, $this->laserTimeConsumptionCalculator);
-        $result = $laserOrder->calculatePriceWithoutDiscount();
+        $laserOrder = new LaserOrder;
+        $result = $laserOrder->calculatePriceWithoutDiscount($this->parts, $this->packages, $this->laserPriceCalculator);
 
         $this->assertIsInt($result);
     }
 
     public function testLaserOrderCalculateTimeConsumption(): void
     {
-        $laserOrder = new LaserOrder($this->parts, $this->packages, $this->laserPriceCalculator, $this->laserTimeConsumptionCalculator);
-        $result = $laserOrder->calculateTimeConsumption();
+        $laserOrder = new LaserOrder;
+        $result = $laserOrder->calculateTimeConsumption($this->parts, $this->packages, $this->laserTimeConsumptionCalculator);
 
         $this->assertIsInt($result);
     }
