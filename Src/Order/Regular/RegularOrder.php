@@ -1,8 +1,10 @@
 <?php
 
-namespace TheClinic\Order;
+namespace TheClinic\Order\Regular;
 
-class Order implements ICalculateOrder
+use TheClinic\Order\ICalculateRegularOrder;
+
+class RegularOrder implements ICalculateRegularOrder
 {
     public function calculatePrice(): int
     {
