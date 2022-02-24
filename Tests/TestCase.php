@@ -9,6 +9,5 @@ class TestCase extends BaseTestCase
 {
     protected function setUp(): void
     {
-        // ServiceContainer::getContainer()->bootServiceProviders();
     }
 }
