@@ -13,15 +13,38 @@ use TheClinic\Exceptions\Order\NoPackageOrPartException;
 
 class LaserOrder implements ICalculateLaserOrder
 {
-    private DSParts|null $parts;
+    public function calculatePrice(DSParts|null $parts = null, DSPackages|null $packages = null, ILaserPriceCalculator $priceCalculator): int
+    {
+        $this->validateDSPackagesAndDSParts($parts, $packages);
 
-    private DSPackages|null $packages;
+        return $priceCalculator->calculate($parts, $packages);
+    }
 
-    private ILaserTimeConsumptionCalculator $timeConsumptionCalculator;
+    public function calculatePriceWithoutDiscount(DSParts|null $parts = null, DSPackages|null $packages = null, ILaserPriceCalculator $priceCalculator): int
+    {
+        $this->validateDSPackagesAndDSParts($parts, $packages);
 
-    private ILaserPriceCalculator $priceCalculator;
+        return $priceCalculator->calculateWithoutDiscount($parts, $packages);
+    }
 
-    public function __construct(DSParts|null $parts = null, DSPackages|null $packages = null, ILaserPriceCalculator $priceCalculator, ILaserTimeConsumptionCalculator $timeConsumptionCalculator)
+    public function calculateTimeConsumption(DSParts|null $parts = null, DSPackages|null $packages = null, ILaserTimeConsumptionCalculator $timeConsumptionCalculator): int
+    {
+        $this->validateDSPackagesAndDSParts($parts, $packages);
+
+        return $timeConsumptionCalculator->calculate($parts, $packages);
+    }
+
+    /**
+     * Validates if packages and parts have the same gender, and if $parts and $packages are not both null.
+     * 
+     * @param DSParts|null|null $parts
+     * @param DSPackages|null|null $packages
+     * @return void
+     * 
+     * @throws NoPackageOrPartException
+     * @throws InvalidGenderException
+     */
+    private function validateDSPackagesAndDSParts(DSParts|null $parts = null, DSPackages|null $packages = null): void
     {
         if (is_null($parts) && is_null($packages)) {
             throw new NoPackageOrPartException("The number of parts and packages can not be zero at same time.", 500);
@@ -30,25 +53,5 @@ class LaserOrder implements ICalculateLaserOrder
         if (!is_null($parts) && !is_null($packages) && ($parts->getGender() !== $packages->getGender())) {
             throw new InvalidGenderException("Packages and parts must have same gender", 500);
         }
-
-        $this->parts = $parts;
-        $this->packages = $packages;
-        $this->priceCalculator = $priceCalculator;
-        $this->timeConsumptionCalculator = $timeConsumptionCalculator;
-    }
-
-    public function calculatePrice(): int
-    {
-        return $this->priceCalculator->calculate($this->parts, $this->packages);
-    }
-
-    public function calculatePriceWithoutDiscount(): int
-    {
-        return $this->priceCalculator->calculateWithoutDiscount($this->parts, $this->packages);
-    }
-
-    public function calculateTimeConsumption(): int
-    {
-        return $this->timeConsumptionCalculator->calculate($this->parts, $this->packages);
     }
 }
