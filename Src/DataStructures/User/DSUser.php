@@ -62,12 +62,12 @@ class DSUser
         return $this->iCheckAuthentication->isAuthenticated();
     }
 
-    public function getRole(): IUserRule
+    public function getRule(): IUserRule
     {
         return $this->role;
     }
 
-    public function setRole(IUserRule $role): void
+    public function setRule(IUserRule $role): void
     {
         $this->role = $role;
     }
