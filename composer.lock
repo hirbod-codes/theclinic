@@ -4,8 +4,54 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b167671d063a84fd94ddab6e163c4c5d",
-    "packages": [],
+    "content-hash": "59d820284aa6da3076f63f6bd6ebee67",
+    "packages": [
+        {
+            "name": "hirbod-codes/theclinicdatastructures",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hirbod-codes/theclinicdatastructures.git",
+                "reference": "b88d11c61ff0e0c7536143ccaeedc6cf5e6dc217"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hirbod-codes/theclinicdatastructures/zipball/b88d11c61ff0e0c7536143ccaeedc6cf5e6dc217",
+                "reference": "b88d11c61ff0e0c7536143ccaeedc6cf5e6dc217",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "fakerphp/faker": "^1.15",
+                "mockery/mockery": "dev-master",
+                "phpunit/phpunit": "9.5"
+            },
+            "type": "project",
+            "autoload": {
+                "psr-4": {
+                    "TheClinicDataStructure\\": "Src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hirbod Khatami",
+                    "email": "hirbod.khatami.words@gmail.com"
+                }
+            ],
+            "description": "The data structures of theclinic project.",
+            "support": {
+                "issues": "https://github.com/hirbod-codes/theclinicdatastructures/issues",
+                "source": "https://github.com/hirbod-codes/theclinicdatastructures/tree/v1.0.0"
+            },
+            "time": "2022-02-25T05:00:43+00:00"
+        }
+    ],
     "packages-dev": [
         {
             "name": "doctrine/instantiator",
@@ -721,16 +767,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "9.2.11",
+            "version": "9.2.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "665a1ac0a763c51afc30d6d130dac0813092b17f"
+                "reference": "deac8540cb7bd40b2b8cfa679b76202834fd04e8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/665a1ac0a763c51afc30d6d130dac0813092b17f",
-                "reference": "665a1ac0a763c51afc30d6d130dac0813092b17f",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/deac8540cb7bd40b2b8cfa679b76202834fd04e8",
+                "reference": "deac8540cb7bd40b2b8cfa679b76202834fd04e8",
                 "shasum": ""
             },
             "require": {
@@ -786,7 +832,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.11"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.13"
             },
             "funding": [
                 {
@@ -794,7 +840,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-02-18T12:46:09+00:00"
+            "time": "2022-02-23T17:02:38+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -2258,12 +2304,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Ctype\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Ctype\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
