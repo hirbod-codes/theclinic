@@ -2,9 +2,9 @@
 
 namespace Tests\Fakers\Time;
 
-use TheClinic\DataStructures\Time\DSTimePeriod;
-use TheClinic\DataStructures\Time\DSTimePeriods;
-use TheClinic\DataStructures\Time\DSWorkSchedule;
+use TheClinicDataStructure\DataStructures\Time\DSTimePeriod;
+use TheClinicDataStructure\DataStructures\Time\DSTimePeriods;
+use TheClinicDataStructure\DataStructures\Time\DSWorkSchedule;
 
 class DSWorkScheduleFaker
 {

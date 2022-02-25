@@ -2,8 +2,8 @@
 
 namespace TheClinic\Order\Laser\Calculations;
 
-use TheClinic\DataStructures\Order\DSPackages;
-use TheClinic\DataStructures\Order\DSParts;
+use TheClinicDataStructure\DataStructures\Order\DSPackages;
+use TheClinicDataStructure\DataStructures\Order\DSParts;
 use TheClinic\Order\Laser\Calculations\TraitCollectDistinguishedParts;
 use TheClinic\Order\Laser\ILaserPriceCalculator;
 
@@ -14,20 +14,20 @@ class PriceCalculator implements ILaserPriceCalculator
     /**
      * It sums up the prices of $parts and $packages(with their discount, each package has a price lower than sum of all of it's contained parts).
      *
-     * @param \TheClinic\DataStructures\Order\DSParts $parts
-     * @param \TheClinic\DataStructures\Order\DSPackages $packages
+     * @param \TheClinicDataStructure\DataStructures\Order\DSParts $parts
+     * @param \TheClinicDataStructure\DataStructures\Order\DSPackages $packages
      * @return integer
      */
     public function calculate(DSParts $parts, DSPackages $packages): int
     {
         $price = 0;
 
-        /** @var \TheClinic\DataStructures\Order\DSPackage $package */
+        /** @var \TheClinicDataStructure\DataStructures\Order\DSPackage $package */
         foreach ($packages as $package) {
             $price += $package->getPrice();
         }
 
-        /** @var \TheClinic\DataStructures\Order\DSPart $part */
+        /** @var \TheClinicDataStructure\DataStructures\Order\DSPart $part */
         foreach ($this->collectPartsThatDontExistInPackages($parts, $packages) as $part) {
             $price += $part->getPrice();
         }
@@ -38,15 +38,15 @@ class PriceCalculator implements ILaserPriceCalculator
     /**
      * It sums up the costs of parts and parts in $packages as if there were no discount for any package.
      *
-     * @param \TheClinic\DataStructures\Order\DSParts $parts
-     * @param \TheClinic\DataStructures\Order\DSPackages $packages
+     * @param \TheClinicDataStructure\DataStructures\Order\DSParts $parts
+     * @param \TheClinicDataStructure\DataStructures\Order\DSPackages $packages
      * @return integer
      */
     public function calculateWithoutDiscount(DSParts $parts, DSPackages $packages): int
     {
         $price = 0;
 
-        /** @var \TheClinic\DataStructures\Order\DSPart $part */
+        /** @var \TheClinicDataStructure\DataStructures\Order\DSPart $part */
         foreach ($this->collectDistinguishedParts($parts, $packages) as $part) {
             $price += $part->getPrice();
         }
@@ -58,13 +58,13 @@ class PriceCalculator implements ILaserPriceCalculator
     {
         $distinguishedParts = [];
 
-        /** @var \TheClinic\DataStructures\Order\DSPart $part */
+        /** @var \TheClinicDataStructure\DataStructures\Order\DSPart $part */
         foreach ($parts as $part) {
             $found = true;
             
-            /** @var \TheClinic\DataStructures\Order\DSPackage $package */
+            /** @var \TheClinicDataStructure\DataStructures\Order\DSPackage $package */
             foreach ($packages as $package) {
-                /** @var \TheClinic\DataStructures\Order\DSPart $packagePart */
+                /** @var \TheClinicDataStructure\DataStructures\Order\DSPart $packagePart */
                 foreach ($package->getParts() as $packagePart) {
                     if ($part->getId() === $packagePart->getId()) {
                         continue;

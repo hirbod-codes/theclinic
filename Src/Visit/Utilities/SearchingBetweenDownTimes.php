@@ -2,8 +2,8 @@
 
 namespace TheClinic\Visit\Utilities;
 
-use TheClinic\DataStructures\Time\DSDownTimes;
-use TheClinic\DataStructures\Visit\DSVisits;
+use TheClinicDataStructure\DataStructures\Time\DSDownTimes;
+use TheClinicDataStructure\DataStructures\Visit\DSVisits;
 use TheClinic\Exceptions\Visit\NeededTimeOutOfRange;
 use TheClinic\Exceptions\Visit\VisitSearchFailure;
 
@@ -30,7 +30,7 @@ class SearchingBetweenDownTimes
         } else {
             $newDSDownTimes = $intruptingDSDownTimes->cloneIt();
 
-            /** @var \TheClinic\DataStructures\Time\DSDownTime $dsDownTime */
+            /** @var \TheClinicDataStructure\DataStructures\Time\DSDownTime $dsDownTime */
             foreach ($newDSDownTimes as $dsDownTime) {
                 if ($dsDownTime->getStartTimestamp() <= $firstTS) {
                     continue;

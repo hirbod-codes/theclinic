@@ -2,8 +2,8 @@
 
 namespace Tests\Fakers\Time;
 
-use TheClinic\DataStructures\Time\DSDownTime;
-use TheClinic\DataStructures\Time\DSDownTimes;
+use TheClinicDataStructure\DataStructures\Time\DSDownTime;
+use TheClinicDataStructure\DataStructures\Time\DSDownTimes;
 
 class DSDownTimesFaker
 {
@@ -50,7 +50,7 @@ class DSDownTimesFaker
     /**
      * Default is two downTimes("09:00:00"-"12:00:00", "17:00:00"-"20:00:00") in 5 days, starting from today.
      *
-     * @return DSDownTimes
+     * @return \TheClinicDataStructure\DataStructures\Time\DSDownTimes
      */
     private function fakeWithDefaultData(): DSDownTimes
     {

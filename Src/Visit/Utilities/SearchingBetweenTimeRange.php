@@ -2,7 +2,7 @@
 
 namespace TheClinic\Visit\Utilities;
 
-use TheClinic\DataStructures\Visit\DSVisits;
+use TheClinicDataStructure\DataStructures\Visit\DSVisits;
 use TheClinic\Exceptions\Visit\NeededTimeOutOfRange;
 use TheClinic\Exceptions\Visit\VisitSearchFailure;
 
@@ -18,7 +18,7 @@ class SearchingBetweenTimeRange
             return $firstTS;
         }
 
-        /** @var \TheClinic\DataStructures\Visit\DSVisit $visit */
+        /** @var \TheClinicDataStructure\DataStructures\Visit\DSVisit $visit */
         foreach ($futureVisits as $visit) {
             if ($visit->getVisitTimestamp() < $firstTS && $visit->getVisitTimestamp() < $lastTS) {
                 continue;

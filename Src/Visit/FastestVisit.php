@@ -2,10 +2,9 @@
 
 namespace TheClinic\Visit;
 
-use Iterator;
-use TheClinic\DataStructures\Time\DSDownTimes;
-use TheClinic\DataStructures\Visit\DSVisits;
-use TheClinic\DataStructures\Time\DSWorkSchedule;
+use TheClinicDataStructure\DataStructures\Time\DSDownTimes;
+use TheClinicDataStructure\DataStructures\Visit\DSVisits;
+use TheClinicDataStructure\DataStructures\Time\DSWorkSchedule;
 use TheClinic\Exceptions\Visit\NeededTimeOutOfRange;
 use TheClinic\Exceptions\Visit\VisitSearchFailure;
 use TheClinic\Visit\IFindVisit;
@@ -84,10 +83,10 @@ class FastestVisit implements IFindVisit
         $newDSWorkSchedule = $this->dsWorkSchedule->cloneIt();
         $newDSWorkSchedule->setStartingDay($this->pointer->format("l"));
 
-        /** @var \TheClinic\DataStructures\Time\DSTimePeriods $periods */
+        /** @var \TheClinicDataStructure\DataStructures\Time\DSTimePeriods $periods */
         foreach ($newDSWorkSchedule as $weekDay => $periods) {
 
-            /** @var \TheClinic\DataStructures\Time\DSTimePeriod $period */
+            /** @var \TheClinicDataStructure\DataStructures\Time\DSTimePeriod $period */
             foreach ($periods as $period) {
                 if (
                     ($this->pointer->getTimestamp() >= $period->getEndTimestamp($date)) ||

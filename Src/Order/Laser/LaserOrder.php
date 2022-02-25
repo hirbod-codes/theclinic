@@ -6,8 +6,8 @@ use TheClinic\Order\ICalculateLaserOrder;
 use TheClinic\Order\Laser\ILaserPriceCalculator;
 use TheClinic\Order\Laser\ILaserTimeConsumptionCalculator;
 
-use TheClinic\DataStructures\Order\DSPackages;
-use TheClinic\DataStructures\Order\DSParts;
+use TheClinicDataStructure\DataStructures\Order\DSPackages;
+use TheClinicDataStructure\DataStructures\Order\DSParts;
 use TheClinic\Exceptions\Order\InvalidGenderException;
 use TheClinic\Exceptions\Order\NoPackageOrPartException;
 
@@ -37,8 +37,8 @@ class LaserOrder implements ICalculateLaserOrder
     /**
      * Validates if packages and parts have the same gender, and if $parts and $packages are not both null.
      * 
-     * @param DSParts|null|null $parts
-     * @param DSPackages|null|null $packages
+     * @param \TheClinicDataStructure\DataStructures\Order\DSParts|null|null $parts
+     * @param \TheClinicDataStructure\DataStructures\Order\DSPackages|null|null $packages
      * @return void
      * 
      * @throws NoPackageOrPartException

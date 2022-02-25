@@ -8,9 +8,9 @@ use Mockery;
 use Tests\TestCase;
 use Tests\Fakers\Time\DSDownTimesFaker;
 use Tests\Fakers\Time\DSWorkScheduleFaker;
-use TheClinic\DataStructures\Time\DSDownTimes;
-use TheClinic\DataStructures\Time\DSWorkSchedule;
-use TheClinic\DataStructures\Visit\DSVisits;
+use TheClinicDataStructure\DataStructures\Time\DSDownTimes;
+use TheClinicDataStructure\DataStructures\Time\DSWorkSchedule;
+use TheClinicDataStructure\DataStructures\Visit\DSVisits;
 use TheClinic\Visit\FastestVisit;
 use TheClinic\Visit\Utilities\DownTime;
 use TheClinic\Visit\Utilities\SearchingBetweenDownTimes;
@@ -158,7 +158,7 @@ class FastestVisitTest extends TestCase
 
     /**
      * @param integer $startFrom 0 means down times will start from now, 1 means they'll start from next first hour, -1 means they start from the hour before.
-     * @return DSDownTimes
+     * @return \TheClinicDataStructure\DataStructures\Time\DSDownTimes
      */
     private function makeDSDowntimes(\DateTime $now, int $days): DSDownTimes
     {
