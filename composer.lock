@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "hirbod-codes/theclinicdatastructures",
-            "version": "v1.0.0",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hirbod-codes/theclinicdatastructures.git",
-                "reference": "b88d11c61ff0e0c7536143ccaeedc6cf5e6dc217"
+                "reference": "b2a01d79b577be92147a72993c6151abef1e2c8a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hirbod-codes/theclinicdatastructures/zipball/b88d11c61ff0e0c7536143ccaeedc6cf5e6dc217",
-                "reference": "b88d11c61ff0e0c7536143ccaeedc6cf5e6dc217",
+                "url": "https://api.github.com/repos/hirbod-codes/theclinicdatastructures/zipball/b2a01d79b577be92147a72993c6151abef1e2c8a",
+                "reference": "b2a01d79b577be92147a72993c6151abef1e2c8a",
                 "shasum": ""
             },
             "require": {
@@ -31,7 +31,7 @@
             "type": "project",
             "autoload": {
                 "psr-4": {
-                    "TheClinicDataStructure\\": "Src/"
+                    "TheClinicDataStructures\\": "Src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -47,9 +47,9 @@
             "description": "The data structures of theclinic project.",
             "support": {
                 "issues": "https://github.com/hirbod-codes/theclinicdatastructures/issues",
-                "source": "https://github.com/hirbod-codes/theclinicdatastructures/tree/v1.0.0"
+                "source": "https://github.com/hirbod-codes/theclinicdatastructures/tree/v1.0.1"
             },
-            "time": "2022-02-25T05:00:43+00:00"
+            "time": "2022-02-25T05:46:04+00:00"
         }
     ],
     "packages-dev": [
