@@ -21,6 +21,8 @@ class DSUser
 
     private string $username;
 
+    private string $password;
+
     private string $gender;
 
     public DSVisits|null $visits;
@@ -38,6 +40,7 @@ class DSUser
         string $firstname,
         string $lastname,
         string $username,
+        string $password,
         string $gender,
         DSVisits|null $visits = null,
         DSOrders|null $orders = null,
@@ -50,6 +53,7 @@ class DSUser
         $this->firstname = $firstname;
         $this->lastname = $lastname;
         $this->username = $username;
+        $this->password = $password;
         $this->gender = $gender;
         $this->visits = $visits;
         $this->orders = $orders;
@@ -62,6 +66,7 @@ class DSUser
         return $this->iCheckAuthentication->isAuthenticated();
     }
 
+    // rule
     public function getRule(): IUserRule
     {
         return $this->role;
@@ -72,6 +77,7 @@ class DSUser
         $this->role = $role;
     }
 
+    // id
     public function getId(): int
     {
         return $this->id;
@@ -82,6 +88,7 @@ class DSUser
         $this->id = $var;
     }
 
+    // firstname
     public function getFirstname(): string
     {
         return $this->firstname;
@@ -92,6 +99,7 @@ class DSUser
         $this->firstname = $var;
     }
 
+    // lastname
     public function getLastname(): string
     {
         return $this->lastname;
@@ -102,6 +110,7 @@ class DSUser
         $this->lastname = $var;
     }
 
+    // username
     public function getUsername(): string
     {
         return $this->username;
@@ -112,6 +121,18 @@ class DSUser
         $this->username = $var;
     }
 
+    // password
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): void
+    {
+        $this->password = $password;
+    }
+
+    // gender
     public function getGender(): string
     {
         return $this->gender;
@@ -122,6 +143,7 @@ class DSUser
         $this->gender = $var;
     }
 
+    // createdAt
     public function getCreatedAt(): \DateTime
     {
         return $this->createdAt;
@@ -132,6 +154,7 @@ class DSUser
         $this->createdAt = $var;
     }
 
+    // updatedAt
     public function getUpdatedAt(): \DateTime
     {
         return $this->updatedAt;
