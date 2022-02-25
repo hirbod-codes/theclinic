@@ -2,7 +2,7 @@
 
 namespace TheClinic\Visit\Utilities;
 
-use TheClinicDataStructure\DataStructures\Time\DSWorkSchedule;
+use TheClinicDataStructures\DataStructures\Time\DSWorkSchedule;
 
 class WorkSchedule
 {
@@ -10,7 +10,7 @@ class WorkSchedule
      * Moves $pointer to the nearest work schedule, if it's not in work schedule hours. otherwise returns it as it is.
      *
      * @param \DateTime $pointer
-     * @param \TheClinicDataStructure\DataStructures\Time\DSWorkSchedule $dsWorkSchedule
+     * @param \TheClinicDataStructures\DataStructures\Time\DSWorkSchedule $dsWorkSchedule
      * @return void
      */
     public function movePointerToClosestWorkSchedule(\DateTime &$pointer, DSWorkSchedule $dsWorkSchedule): void
@@ -24,9 +24,9 @@ class WorkSchedule
         $newDSWorkSchedule = $dsWorkSchedule->cloneIt();
         $newDSWorkSchedule->setStartingDay($pointer->format("l"));
 
-        /** @var \TheClinicDataStructure\DataStructures\Time\DSTimePeriods $periods */
+        /** @var \TheClinicDataStructures\DataStructures\Time\DSTimePeriods $periods */
         foreach ($newDSWorkSchedule as $weekDay => $periods) {
-            /** @var \TheClinicDataStructure\DataStructures\Time\DSTimePeriod $period */
+            /** @var \TheClinicDataStructures\DataStructures\Time\DSTimePeriod $period */
             foreach ($periods as $period) {
                 if ($pointerTS < $period->getStartTimestamp($date)) {
                     $pointer->setTimestamp($period->getStartTimestamp($date));
@@ -49,7 +49,7 @@ class WorkSchedule
 
     /**
      * @param \DateTime $dt
-     * @param \TheClinicDataStructure\DataStructures\Time\DSWorkSchedule $dsWorkSchedule
+     * @param \TheClinicDataStructures\DataStructures\Time\DSWorkSchedule $dsWorkSchedule
      * @return boolean
      */
     public function isInWorkSchedule(\DateTime $dt, DSWorkSchedule $dsWorkSchedule): bool
@@ -61,7 +61,7 @@ class WorkSchedule
 
         /** @var array $workDay */
         foreach ($newDSWorkSchedule as $workDay) {
-            /** @var \TheClinicDataStructure\DataStructures\Time\DSTimePeriod $period */
+            /** @var \TheClinicDataStructures\DataStructures\Time\DSTimePeriod $period */
             foreach ($workDay as $period) {
                 if ($dtTS < $period->getEndTimestamp($date) && $dtTS >= $period->getStartTimestamp($date)) {
                     return true;

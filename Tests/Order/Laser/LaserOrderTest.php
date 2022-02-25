@@ -6,8 +6,8 @@ use Faker\Factory;
 use Faker\Generator;
 use Mockery;
 use Tests\TestCase;
-use TheClinicDataStructure\DataStructures\Order\DSPackages;
-use TheClinicDataStructure\DataStructures\Order\DSParts;
+use TheClinicDataStructures\DataStructures\Order\DSPackages;
+use TheClinicDataStructures\DataStructures\Order\DSParts;
 use TheClinic\Exceptions\Order\InvalidGenderException;
 use TheClinic\Exceptions\Order\NoPackageOrPartException;
 use TheClinic\Order\Laser\ILaserPriceCalculator;
@@ -33,11 +33,11 @@ class LaserOrderTest extends TestCase
 
         $gender = "Male";
 
-        /** @var \TheClinicDataStructure\DataStructures\Order\DSParts|\Mockery\MockInterface $parts */
+        /** @var \TheClinicDataStructures\DataStructures\Order\DSParts|\Mockery\MockInterface $parts */
         $this->parts = Mockery::mock(DSParts::class);
         $this->parts->shouldReceive("getGender")->andReturn($gender);
 
-        /** @var \TheClinicDataStructure\DataStructures\Order\DSPackages|\Mockery\MockInterface $packages */
+        /** @var \TheClinicDataStructures\DataStructures\Order\DSPackages|\Mockery\MockInterface $packages */
         $this->packages = Mockery::mock(DSPackages::class);
         $this->packages->shouldReceive("getGender")->andReturn($gender);
 

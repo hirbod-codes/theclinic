@@ -2,8 +2,8 @@
 
 namespace TheClinic\Order;
 
-use TheClinicDataStructure\DataStructures\Order\DSPackages;
-use TheClinicDataStructure\DataStructures\Order\DSParts;
+use TheClinicDataStructures\DataStructures\Order\DSPackages;
+use TheClinicDataStructures\DataStructures\Order\DSParts;
 use TheClinic\Order\ICalculateOrder;
 use TheClinic\Order\Laser\ILaserPriceCalculator;
 use TheClinic\Order\Laser\ILaserTimeConsumptionCalculator;

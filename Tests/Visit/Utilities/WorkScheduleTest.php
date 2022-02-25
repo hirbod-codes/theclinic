@@ -6,7 +6,7 @@ use Faker\Factory;
 use Faker\Generator;
 use Tests\TestCase;
 use Tests\Fakers\Time\DSWorkScheduleFaker;
-use TheClinicDataStructure\DataStructures\Time\DSWorkSchedule;
+use TheClinicDataStructures\DataStructures\Time\DSWorkSchedule;
 use TheClinic\Visit\Utilities\WorkSchedule;
 
 class WorkScheduleTest extends TestCase

@@ -5,8 +5,8 @@ namespace Tests\Visit;
 use Faker\Factory;
 use Faker\Generator;
 use Tests\TestCase;
-use TheClinicDataStructure\DataStructures\Visit\DSVisit;
-use TheClinicDataStructure\DataStructures\Visit\DSVisits;
+use TheClinicDataStructures\DataStructures\Visit\DSVisit;
+use TheClinicDataStructures\DataStructures\Visit\DSVisits;
 use TheClinic\Visit\Utilities\SearchingBetweenTimeRange;
 
 class SearchingBetweenTimeRangeTest extends TestCase

@@ -4,8 +4,8 @@ namespace Tests\Fakers\Order;
 
 use Faker\Factory;
 use Faker\Generator;
-use TheClinicDataStructure\DataStructures\Order\DSPackage;
-use TheClinicDataStructure\DataStructures\Order\DSParts;
+use TheClinicDataStructures\DataStructures\Order\DSPackage;
+use TheClinicDataStructures\DataStructures\Order\DSParts;
 
 class DSPackageFaker
 {

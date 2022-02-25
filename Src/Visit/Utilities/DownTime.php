@@ -2,7 +2,7 @@
 
 namespace TheClinic\Visit\Utilities;
 
-use TheClinicDataStructure\DataStructures\Time\DSDownTimes;
+use TheClinicDataStructures\DataStructures\Time\DSDownTimes;
 
 class DownTime
 {
@@ -10,7 +10,7 @@ class DownTime
      * Moves $time to the first available up time, if it's in a down time. otherwise returns it as it is.
      *
      * @param \DateTime $time
-     * @param \TheClinicDataStructure\DataStructures\Time\DSDownTimes $dsDownTimes
+     * @param \TheClinicDataStructures\DataStructures\Time\DSDownTimes $dsDownTimes
      * @return void
      */
     public function moveTimeToClosestUpTime(\DateTime &$time, DSDownTimes $dsDownTimes): void
@@ -22,8 +22,8 @@ class DownTime
         }
 
         $newDSDownTimes = $dsDownTimes->cloneIt();
-        
-        /** @var \TheClinicDataStructure\DataStructures\Time\DSDownTime $downTime */
+
+        /** @var \TheClinicDataStructures\DataStructures\Time\DSDownTime $downTime */
         foreach ($newDSDownTimes as $downTime) {
             if ($pointerTS >= $downTime->getStartTimestamp() && $pointerTS < $downTime->getEndTimestamp()) {
                 $time = $downTime->getEnd();
@@ -36,7 +36,7 @@ class DownTime
 
     /**
      * @param \DateTime $dt
-     * @param \TheClinicDataStructure\DataStructures\Time\DSDownTimes $dsDownTimes
+     * @param \TheClinicDataStructures\DataStructures\Time\DSDownTimes $dsDownTimes
      * @return boolean
      */
     public function isInDownTime(\DateTime $dt, DSDownTimes $dsDownTimes): bool
@@ -44,7 +44,7 @@ class DownTime
         $dtTS = $dt->getTimestamp();
         $newDSDownTimes = $dsDownTimes->cloneIt();
 
-        /** @var \TheClinicDataStructure\DataStructures\Time\DSDownTime $downTime */
+        /** @var \TheClinicDataStructures\DataStructures\Time\DSDownTime $downTime */
         foreach ($newDSDownTimes as $downTime) {
             if ($dtTS < $downTime->getEndTimestamp() && $dtTS >= $downTime->getStartTimestamp()) {
                 return true;
@@ -57,15 +57,15 @@ class DownTime
     /**
      * @param integer $firstTS
      * @param integer $lastTS
-     * @param \TheClinicDataStructure\DataStructures\Time\DSDownTimes $dsDownTimes
-     * @return \TheClinicDataStructure\DataStructures\Time\DSDownTimes
+     * @param \TheClinicDataStructures\DataStructures\Time\DSDownTimes $dsDownTimes
+     * @return \TheClinicDataStructures\DataStructures\Time\DSDownTimes
      */
     public function findDownTimeIntruptionWithTimeRange(int $firstTS, int $lastTS, DSDownTimes $dsDownTimes): DSDownTimes
     {
         $intruptingDsDownTimes = new DSDownTimes;
         $newDSDownTimes = $dsDownTimes->cloneIt();
 
-        /** @var \TheClinicDataStructure\DataStructures\Time\DSDownTime $dsDownTime */
+        /** @var \TheClinicDataStructures\DataStructures\Time\DSDownTime $dsDownTime */
         foreach ($newDSDownTimes as $dsDownTime) {
             if ($lastTS <= $dsDownTime->getStartTimestamp()) {
                 break;

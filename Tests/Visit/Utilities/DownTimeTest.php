@@ -6,8 +6,8 @@ use Faker\Factory;
 use Faker\Generator;
 use Tests\TestCase;
 use Tests\Fakers\Time\DSDownTimesFaker;
-use TheClinicDataStructure\DataStructures\Time\DSDownTime;
-use TheClinicDataStructure\DataStructures\Time\DSDownTimes;
+use TheClinicDataStructures\DataStructures\Time\DSDownTime;
+use TheClinicDataStructures\DataStructures\Time\DSDownTimes;
 use TheClinic\Visit\Utilities\DownTime;
 
 class DownTimeTest extends TestCase

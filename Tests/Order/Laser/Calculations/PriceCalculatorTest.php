@@ -10,8 +10,8 @@ use Tests\Fakers\Order\DSPackageFaker;
 use Tests\Fakers\Order\DSPackagesFaker;
 use Tests\Fakers\Order\DSPartFaker;
 use Tests\Fakers\Order\DSPartsFaker;
-use TheClinicDataStructure\DataStructures\Order\DSPackages;
-use TheClinicDataStructure\DataStructures\Order\DSParts;
+use TheClinicDataStructures\DataStructures\Order\DSPackages;
+use TheClinicDataStructures\DataStructures\Order\DSParts;
 use TheClinic\Order\Laser\Calculations\PriceCalculator;
 
 class PriceCalculatorTest extends TestCase

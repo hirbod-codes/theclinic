@@ -2,8 +2,8 @@
 
 namespace TheClinic\Order\Laser\Calculations;
 
-use TheClinicDataStructure\DataStructures\Order\DSPackages;
-use TheClinicDataStructure\DataStructures\Order\DSParts;
+use TheClinicDataStructures\DataStructures\Order\DSPackages;
+use TheClinicDataStructures\DataStructures\Order\DSParts;
 
 trait TraitCollectDistinguishedParts
 {
@@ -11,20 +11,20 @@ trait TraitCollectDistinguishedParts
      * It collects parts from $packages that don't already exist in $parts and then adds them to $parts 
      * so we can have all the unique parts in $parts and $packages.
      *
-     * @param \TheClinicDataStructure\DataStructures\Order\DSParts $parts
-     * @param \TheClinicDataStructure\DataStructures\Order\DSPackages $packages
+     * @param \TheClinicDataStructures\DataStructures\Order\DSParts $parts
+     * @param \TheClinicDataStructures\DataStructures\Order\DSPackages $packages
      * @return array
      */
     private function collectDistinguishedParts(DSParts $parts, DSPackages $packages): array
     {
         $packagesParts = [];
 
-        /** @var \TheClinicDataStructure\DataStructures\Order\DSPackage $package */
+        /** @var \TheClinicDataStructures\DataStructures\Order\DSPackage $package */
         foreach ($packages as $package) {
-            /** @var \TheClinicDataStructure\DataStructures\Order\DSPart $packagePart */
+            /** @var \TheClinicDataStructures\DataStructures\Order\DSPart $packagePart */
             foreach ($package->getParts() as $packagePart) {
                 $found = true;
-                /** @var \TheClinicDataStructure\DataStructures\Order\DSPart $part */
+                /** @var \TheClinicDataStructures\DataStructures\Order\DSPart $part */
                 foreach ($parts as $part) {
                     if ($part->getId() === $packagePart->getId()) {
                         continue;
