@@ -4,19 +4,34 @@ namespace Tests\Visit;
 
 use Faker\Factory;
 use Faker\Generator;
+use Mockery;
+use Mockery\MockInterface;
 use Tests\TestCase;
 use TheClinicDataStructures\DataStructures\Visit\DSVisit;
 use TheClinicDataStructures\DataStructures\Visit\DSVisits;
 use TheClinic\Visit\Utilities\SearchingBetweenTimeRange;
+use TheClinicDataStructures\DataStructures\Order\DSOrder;
+use TheClinicDataStructures\DataStructures\User\DSUser;
 
 class SearchingBetweenTimeRangeTest extends TestCase
 {
     private Generator $faker;
 
+    private DSUser|MockInterface $user;
+
+    private DSOrder|MockInterface $order;
+
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->faker = Factory::create();
+
+        /** @var DSUser|MockInterface $user */
+        $this->user = Mockery::mock(DSUser::class);
+
+        /** @var DSOrder|MockInterface $order */
+        $this->order = Mockery::mock(DSOrder::class);
     }
 
     public function testSearch(): void
@@ -52,7 +67,7 @@ class SearchingBetweenTimeRangeTest extends TestCase
         $this->assertEquals((new \DateTime("10:30:00"))->getTimestamp(), (new \DateTime())->setTimestamp($timestamp)->getTimestamp());
 
         $visit = new \DateTime("11:40:00");
-        $dsVisits[] = new DSVisit(45, null, null, $visit->getTimestamp(), 1800, null, null, new \DateTime(), new \DateTime());
+        $dsVisits[] = new DSVisit(45, $this->user, $this->order, $visit->getTimestamp(), 1800, null, null, new \DateTime(), new \DateTime());
 
         $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 3600, $dsVisits);
         $this->assertIsInt($timestamp);
@@ -60,7 +75,7 @@ class SearchingBetweenTimeRangeTest extends TestCase
 
         $dsVisits = $this->makeFutureVisits(11);
         $visit = new \DateTime("11:30:00");
-        $dsVisits[] = new DSVisit(45, null, null, $visit->getTimestamp(), 1800, null, null, new \DateTime(), new \DateTime());
+        $dsVisits[] = new DSVisit(45, $this->user, $this->order, $visit->getTimestamp(), 1800, null, null, new \DateTime(), new \DateTime());
 
         $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 3600, $dsVisits);
         $this->assertIsInt($timestamp);
@@ -78,7 +93,7 @@ class SearchingBetweenTimeRangeTest extends TestCase
             }
 
             $visit = new \DateTime(strval($i) . ":00:00");
-            $dsVisits[] = new DSVisit($i, null, null, $visit->getTimestamp(), $consumingTime, null, null, new \DateTime(), new \DateTime());
+            $dsVisits[] = new DSVisit($i, $this->user, $this->order, $visit->getTimestamp(), $consumingTime, null, null, new \DateTime(), new \DateTime());
         }
         return $dsVisits;
     }
