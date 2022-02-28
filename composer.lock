@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "hirbod-codes/theclinicdatastructures",
-            "version": "v1.5.0",
+            "version": "v1.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hirbod-codes/theclinicdatastructures.git",
-                "reference": "d610159654862bf2e8623e4f125516feacf926d9"
+                "reference": "dc20582976940a2ed9ab4f8aa310c1b7a5519cd6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hirbod-codes/theclinicdatastructures/zipball/d610159654862bf2e8623e4f125516feacf926d9",
-                "reference": "d610159654862bf2e8623e4f125516feacf926d9",
+                "url": "https://api.github.com/repos/hirbod-codes/theclinicdatastructures/zipball/dc20582976940a2ed9ab4f8aa310c1b7a5519cd6",
+                "reference": "dc20582976940a2ed9ab4f8aa310c1b7a5519cd6",
                 "shasum": ""
             },
             "require": {
@@ -47,9 +47,9 @@
             "description": "The data structures of theclinic project.",
             "support": {
                 "issues": "https://github.com/hirbod-codes/theclinicdatastructures/issues",
-                "source": "https://github.com/hirbod-codes/theclinicdatastructures/tree/v1.5.0"
+                "source": "https://github.com/hirbod-codes/theclinicdatastructures/tree/v1.6.1"
             },
-            "time": "2022-02-27T12:19:25+00:00"
+            "time": "2022-02-28T05:46:12+00:00"
         }
     ],
     "packages-dev": [
