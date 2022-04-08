@@ -4,7 +4,6 @@ namespace Tests\Visit;
 
 use Faker\Factory;
 use Faker\Generator;
-use Mockery;
 use Tests\TestCase;
 use Tests\Fakers\Time\DSDownTimesFaker;
 use Tests\Fakers\Time\DSWorkScheduleFaker;
@@ -16,139 +15,190 @@ use TheClinic\Visit\Utilities\DownTime;
 use TheClinic\Visit\Utilities\SearchingBetweenDownTimes;
 use TheClinic\Visit\Utilities\SearchingBetweenTimeRange;
 use TheClinic\Visit\Utilities\WorkSchedule;
+use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriod;
+use TheClinicDataStructures\DataStructures\Time\DSDownTime;
+use TheClinicDataStructures\DataStructures\Visit\DSVisit;
+use TheClinicDataStructures\DataStructures\Visit\Laser\DSLaserVisit;
 
 class FastestVisitTest extends TestCase
 {
     private Generator $faker;
+    private DSVisits $dsVisits;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->faker = Factory::create();
+
+        $this->dsVisits = $this->makeFutureVisits('Natural');
     }
 
-    public function testFindVisit(): void
+    public function testMultiFindVisit(): void
+    {
+        try {
+            $visitsCount = 500;
+            $futureDays = 4;
+
+            $t = explode(' ', microtime());
+            $ms = $t[0];
+            $s = $t[1];
+
+            for ($i = 0; $i < $visitsCount; $i++) {
+                $consumingTime = round($this->faker->numberBetween(600, 5400), -2);
+                // $consumingTime = 3600;
+                if ($i % 5 === 0) {
+                    $consumingTime = 100;
+                }
+
+                $testStartingTime = (new \DateTime("00:00:00"))->modify("+1 day");
+                $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays, 3600, 1800);
+                $this->logDSDownTimes($dsDownTimes);
+                $dsWorkSchedule = $this->makeDSWorkSchedule();
+                $this->logDSWorkSchedule($dsWorkSchedule);
+
+                $tt = explode(' ', microtime());
+                $tms = $tt[0];
+                $ts = $tt[1];
+                $timestamp = $this->findVisit($testStartingTime, $consumingTime, $dsDownTimes, $dsWorkSchedule);
+                $tt1 = explode(' ', microtime());
+                $tms1 = $tt1[0];
+                $ts1 = $tt1[1];
+
+                $this->dsVisits->setSort('Natural');
+                $this->addToFutureVisits($timestamp, $consumingTime, $i, ($ts1 + $tms1) - ($ts + $tms));
+            }
+
+            $this->assertCount($visitsCount, $this->dsVisits);
+        } finally {
+            $t1 = explode(' ', microtime());
+            $ms1 = $t1[0];
+            $s1 = $t1[1];
+
+            $t = ($s1 + $ms1) - ($s + $ms);
+
+            $this->log('Total visits: ' . strval($visitsCount) . "\n");
+            $this->log('Total needed time: ' . strval($t) . "\n\n");
+        }
+    }
+
+    public function testFindVisits(): void
     {
         $futureDays = 1;
 
-        $now = new \DateTime();
-        $testStartingTime = (new \DateTime($now->format("Y-m-d") . " 00:00:00"))->modify("+1 day");
-        $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays);
+        // No gap
+        $testStartingTime = (new \DateTime("00:00:00"))->modify("+1 day");
+        $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays, 3600, 1800);
+        $expected = (new \DateTime())
+            ->setTimestamp($testStartingTime->getTimestamp())
+            ->modify("+" . strval($futureDays) . " days")
+            // 
+        ;
 
-        $timestamp = (new FastestVisit(
-            $testStartingTime,
-            3600,
-            $this->makeFutureVisits(),
-            $this->makeDSWorkSchedule(),
-            $dsDownTimes,
-            new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, new DownTime),
-            new WorkSchedule,
-            new DownTime
-        ))->findVisit();
-        $this->assertIsInt($timestamp);
-        $this->assertEquals(
-            ($expected = new \DateTime())->setTimestamp($testStartingTime->getTimestamp())->modify("+" . strval($futureDays) . " days")->modify("+8 hours")->getTimestamp(),
-            $timestamp,
-            "now : " . (new \DateTime)->format("Y-m-d H:i:s l") . " expected is: " . $expected->format("Y-m-d H:i:s l") .
-                " and actual is: " . (new \DateTime)->setTimestamp($timestamp)->format("Y-m-d H:i:s l")
-        );
+        $this->testFindVisit($testStartingTime, $dsDownTimes, $expected, $this->makeDSWorkSchedule());
 
         // A gap at start
-        $now = new \DateTime();
-        $testStartingTime = (new \DateTime($now->format("Y-m-d") . " 00:00:00"))->modify("+1 day");
-        $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays);
-        unset($dsDownTimes[8]);
+        $testStartingTime = (new \DateTime("00:00:00"))->modify("+1 day");
+        $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays, 3600, 1800);
+        unset($dsDownTimes[0]);
+        $expected = (new \DateTime())
+            ->setTimestamp($testStartingTime->getTimestamp())
+            // 
+        ;
 
-        $timestamp = (new FastestVisit(
-            $testStartingTime,
-            3600,
-            $this->makeFutureVisits(),
-            $this->makeDSWorkSchedule(),
-            $dsDownTimes,
-            new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, new DownTime),
-            new WorkSchedule,
-            new DownTime
-        ))->findVisit();
+        $this->testFindVisit($testStartingTime, $dsDownTimes, $expected, $this->makeDSWorkSchedule());
+
+        // A small gap at start
+        $testStartingTime = (new \DateTime("00:00:00"))->modify("+1 day");
+        $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays, 3600, 1800);
+        $testStartingTime->modify('-10 minutes');
+        $expected = (new \DateTime())
+            ->setTimestamp($testStartingTime->getTimestamp())
+            ->modify("+" . strval($futureDays) . " days")
+            ->modify('+10 minutes')
+            // 
+        ;
+
+        $this->testFindVisit($testStartingTime, $dsDownTimes, $expected, $this->makeDSWorkSchedule());
+
+        // A gap after start
+        $testStartingTime = (new \DateTime("00:00:00"))->modify("+1 day");
+        $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays, 3600, 1800);
+        unset($dsDownTimes[2]);
+        $expected = (new \DateTime())
+            ->setTimestamp($testStartingTime->getTimestamp())
+            ->modify('+90 minutes')
+            // 
+        ;
+
+        $this->testFindVisit($testStartingTime, $dsDownTimes, $expected, $this->makeDSWorkSchedule());
+    }
+
+    private function testFindVisit(\DateTime $now, DSDownTimes $dsDownTimes, \DateTime $expected, DSWorkSchedule $dsWorkSchedule, int $consumingTime = 3600): void
+    {
+        $timestamp = $this->findVisit($now, $consumingTime, $dsDownTimes, $dsWorkSchedule);
+
         $this->assertIsInt($timestamp);
         $this->assertEquals(
-            ($expected = new \DateTime())->setTimestamp($testStartingTime->getTimestamp())->modify("+8 hours")->getTimestamp(),
-            $timestamp
-        );
-
-        // No gap at start
-        $now = new \DateTime();
-        $testStartingTime = (new \DateTime($now->format("Y-m-d") . " 00:00:00"))->modify("+1 day");
-        $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays);
-        unset($dsDownTimes[9]);
-        $testStartingTime->modify("+8 hours")->modify("+10 minutes");
-
-        $timestamp = (new FastestVisit(
-            $testStartingTime,
-            3600,
-            $this->makeFutureVisits(),
-            $this->makeDSWorkSchedule(),
-            $dsDownTimes,
-            new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, new DownTime),
-            new WorkSchedule,
-            new DownTime
-        ))->findVisit();
-        $this->assertIsInt($timestamp);
-        $this->assertEquals(
-            ($expected = new \DateTime())->setTimestamp($testStartingTime->getTimestamp())->modify("+20 minutes")->getTimestamp(),
+            $expected->getTimestamp(),
             $timestamp,
             "now : " . (new \DateTime)->format("Y-m-d H:i:s l") . " expected is: " . $expected->format("Y-m-d H:i:s l") .
                 " and actual is: " . (new \DateTime)->setTimestamp($timestamp)->format("Y-m-d H:i:s l")
-        );
-
-        // A random gap 
-        $now = new \DateTime();
-        $testStartingTime = (new \DateTime($now->format("Y-m-d") . " 00:00:00"))->modify("+1 day");
-        $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays);
-        unset($dsDownTimes[9]);
-        $testStartingTime->modify("+8 hours")->modify("+40 minutes");
-
-        $timestamp = (new FastestVisit(
-            $testStartingTime,
-            3600,
-            $this->makeFutureVisits(),
-            $this->makeDSWorkSchedule(),
-            $dsDownTimes,
-            new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, new DownTime),
-            new WorkSchedule,
-            new DownTime
-        ))->findVisit();
-        $this->assertIsInt($timestamp);
-        $this->assertEquals(
-            $testStartingTime->getTimestamp(),
-            $timestamp
-        );
-
-        // A random gap 
-        $now = new \DateTime();
-        $testStartingTime = (new \DateTime($now->format("Y-m-d") . " 00:00:00"))->modify("+1 day");
-        $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays);
-        unset($dsDownTimes[10]);
-
-        $timestamp = (new FastestVisit(
-            $testStartingTime,
-            3600,
-            $this->makeFutureVisits(),
-            $this->makeDSWorkSchedule(),
-            $dsDownTimes,
-            new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, new DownTime),
-            new WorkSchedule,
-            new DownTime
-        ))->findVisit();
-        $this->assertIsInt($timestamp);
-        $this->assertEquals(
-            (new \DateTime())->setTimestamp($testStartingTime->getTimestamp())->modify("+9 hours")->modify("+30 minutes")->getTimestamp(),
-            $timestamp
         );
     }
 
-    private function makeFutureVisits(): DSVisits
+    private function findVisit(\DateTime $now, int $consumingTime, DSDownTimes $dsDownTimes, DSWorkSchedule $dsWorkSchedule): int
     {
-        return new DSVisits("ASC");
+        return (new FastestVisit(
+            $now,
+            $consumingTime,
+            $this->dsVisits,
+            $dsWorkSchedule,
+            $dsDownTimes,
+            new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, new DownTime),
+            new WorkSchedule,
+            new DownTime
+        ))->findVisit();
+    }
+
+    private function makeFutureVisits(string $sort): DSVisits
+    {
+        $dsVisits = new DSVisits($sort);
+        return $dsVisits;
+    }
+
+    private function addToFutureVisits(int $timestamp, int $consumingTime, int $i, float $t): void
+    {
+        try {
+            $this->dsVisits[] = $dsVisit = $this->makeDSLaserVisit($timestamp, $consumingTime);
+            $this->logVisit($dsVisit, $dsVisit->getConsumingTime(), $i, $t);
+        } catch (\Throwable $th) {
+            $contents = "\n"
+                . '"' . (new \DateTime)->format('Y-m-d H:i:s l') . '"'
+                . '    '
+                . 'visit: '
+                . (new \DateTime)->setTimestamp($timestamp)->format('Y-m-d H:i:s l')
+                . '    '
+                . 'visit_consuming_time: '
+                . strval(intval($consumingTime / 60)) . ' M'
+                . ' '
+                . strval($consumingTime % 60) . ' S'
+                // 
+            ;
+            $this->log($contents, false, 'dsVisitErors.log');
+            throw $th;
+        }
+    }
+
+    private function makeDSLaserVisit(int $timestamp, int $consumingTime): DSLaserVisit
+    {
+        $dsVisit = new DSLaserVisit(
+            $this->faker->numberBetween(1, 1000),
+            $timestamp,
+            $consumingTime,
+            new \DateTime(),
+            new \DateTime()
+        );
+        return $dsVisit;
     }
 
     private function makeDSWorkSchedule(): DSWorkSchedule
@@ -156,11 +206,7 @@ class FastestVisitTest extends TestCase
         return (new DSWorkScheduleFaker())->fakeIt();
     }
 
-    /**
-     * @param integer $startFrom 0 means down times will start from now, 1 means they'll start from next first hour, -1 means they start from the hour before.
-     * @return \TheClinicDataStructures\DataStructures\Time\DSDownTimes
-     */
-    private function makeDSDowntimes(\DateTime $now, int $days): DSDownTimes
+    private function makeDSDowntimes(\DateTime $now, int $days, int $downTimeGapDurationSeconds, int $downTimeDurationSeconds): DSDownTimes
     {
         $pointer = (new \DateTime())->setTimestamp($now->getTimestamp());
         $limit = (new \DateTime())->setTimestamp($now->getTimestamp())->modify("+" . strval($days) . " days")->getTimestamp();
@@ -169,17 +215,108 @@ class FastestVisitTest extends TestCase
         $customData = [];
         $start = (new \DateTime())->setTimestamp($pointer->getTimestamp());
 
-        while ((new \DateTime())->setTimestamp($pointer->getTimestamp())->modify("+90 minutes")->getTimestamp() <= $limit) {
+        while ((new \DateTime())->setTimestamp($pointer->getTimestamp())->modify("+" . ($downTimeGapDurationSeconds + $downTimeDurationSeconds) . " seconds")->getTimestamp() <= $limit) {
             if (!$first) {
-                $start = (new \DateTime())->setTimestamp($pointer->modify("+1 hour")->getTimestamp());
+                $start = (new \DateTime())->setTimestamp($pointer->modify("+" . $downTimeGapDurationSeconds . " seconds")->getTimestamp());
             }
-            $end = (new \DateTime())->setTimestamp($start->getTimestamp())->modify("+30 minutes");
+            $end = (new \DateTime())->setTimestamp($start->getTimestamp())->modify("+" . $downTimeDurationSeconds . " seconds");
 
-            $customData[] = [$start, $end];
+            $customData[] = [$start, $end, $this->faker->lexify()];
 
             $first = false;
         }
 
         return (new DSDownTimesFaker($customData))->fakeIt();
+    }
+
+    private function logVisit(DSVisit $dsVisit, int $consumingTime, int $i, float $time): void
+    {
+        $contents =
+            strval($i)
+            . '        ' .
+            strval($dsVisit->getVisitTimestamp())
+            . '        ' .
+            (new \DateTime)->setTimestamp($dsVisit->getVisitTimestamp())->format("Y-m-d H:i:s l")
+            . '        ' .
+            strval(intval($consumingTime / 60)) . ' M'
+            . '        ' .
+            strval($consumingTime % 60) . ' S'
+            . '        ' .
+            strval($time) . ' '
+            // 
+        ;
+
+        $contents .= ''
+            . "\n"
+            // 
+        ;
+
+        $this->log($contents);
+    }
+
+    private function logDSDownTimes(DSDownTimes $dsDownTimes): void
+    {
+        $counter = 0;
+        $contents = "";
+        /** @var DSDownTime $dsDownTime */
+        foreach ($dsDownTimes as $dsDownTime) {
+            $contents .= "\n" .
+                strval($counter) .
+                "      " .
+                $dsDownTime->getStart()->format("Y-m-d H:i:s l") .
+                "      " .
+                $dsDownTime->getEnd()->format("Y-m-d H:i:s l")
+                // 
+            ;
+            $counter++;
+        }
+
+        $this->log($contents, true, 'dsDownTimes.log');
+    }
+
+    private function logDSWorkSchedule(DSWorkSchedule $dsWorkSchedule): void
+    {
+        $counter = 0;
+        $contents = "";
+        /** @var DSDateTimePeriods $dsDateTimePeriods */
+        foreach ($dsWorkSchedule as $weekDay => $dsDateTimePeriods) {
+            $contents .= "\n" .
+                strval($counter) .
+                "      "
+                // 
+            ;
+            /** @var DSDateTimePeriod $dsDateTimePeriod */
+            foreach ($dsDateTimePeriods as $dsDateTimePeriod) {
+                $contents .= $weekDay .
+                    "      " .
+                    "[" .
+                    $dsDateTimePeriod->getStart()->format("Y-m-d H:i:s l") .
+                    "---" .
+                    $dsDateTimePeriod->getEnd()->format("Y-m-d H:i:s l") .
+                    "]"
+                    // 
+                ;
+            }
+
+            $contents .= "\n";
+            $counter++;
+        }
+
+        $this->log($contents, true, 'dsWorkSchedule.log');
+    }
+
+    private function log(string $contents, bool $overwrite = false, string $filename = 'visitTest.log'): void
+    {
+        $filename = __DIR__ . '/' . $filename;
+        if (!is_file($filename)) {
+            fopen($filename, 'w');
+        }
+
+        if ($overwrite) {
+            file_put_contents($filename, $contents);
+        } else {
+            $contents = file_get_contents($filename) . $contents;
+            file_put_contents($filename, $contents);
+        }
     }
 }
