@@ -2,6 +2,8 @@
 
 namespace TheClinic\Visit\Utilities;
 
+use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriod;
+use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriods;
 use TheClinicDataStructures\DataStructures\Time\DSWorkSchedule;
 
 class WorkSchedule
@@ -10,7 +12,7 @@ class WorkSchedule
      * Moves $pointer to the nearest work schedule, if it's not in work schedule hours. otherwise returns it as it is.
      *
      * @param \DateTime $pointer
-     * @param \TheClinicDataStructures\DataStructures\Time\DSWorkSchedule $dsWorkSchedule
+     * @param DSWorkSchedule $dsWorkSchedule
      * @return void
      */
     public function movePointerToClosestWorkSchedule(\DateTime &$pointer, DSWorkSchedule $dsWorkSchedule): void
@@ -19,26 +21,25 @@ class WorkSchedule
             return;
         }
 
-        $date = $pointer->format("Y-m-d");
         $pointerTS = $pointer->getTimestamp();
         $newDSWorkSchedule = $dsWorkSchedule->cloneIt();
         $newDSWorkSchedule->setStartingDay($pointer->format("l"));
 
-        /** @var \TheClinicDataStructures\DataStructures\Time\DSTimePeriods $periods */
+        /** @var DSDateTimePeriods $periods */
         foreach ($newDSWorkSchedule as $weekDay => $periods) {
-            /** @var \TheClinicDataStructures\DataStructures\Time\DSTimePeriod $period */
+            /** @var DSDateTimePeriod $period */
             foreach ($periods as $period) {
-                if ($pointerTS < $period->getStartTimestamp($date)) {
-                    $pointer->setTimestamp($period->getStartTimestamp($date));
+                if ($pointerTS < $period->getStartTimestamp()) {
+                    $pointer->setTimestamp($period->getStartTimestamp());
 
                     return;
                 }
             }
 
-            if ($pointerTS >= $period->getEndTimestamp($date)) {
+            if ($pointerTS >= $period->getEndTimestamp()) {
                 $newDSWorkSchedule->next();
                 if ($newDSWorkSchedule->valid()) {
-                    $pointer->setTimestamp($newDSWorkSchedule->current()[0]->getStartTimestamp($pointer->modify("+1 day")->format("Y-m-d")));
+                    $pointer->setTimestamp($newDSWorkSchedule->current()[0]->getStartTimestamp());
                     return;
                 }
             }
@@ -49,21 +50,20 @@ class WorkSchedule
 
     /**
      * @param \DateTime $dt
-     * @param \TheClinicDataStructures\DataStructures\Time\DSWorkSchedule $dsWorkSchedule
+     * @param DSWorkSchedule $dsWorkSchedule
      * @return boolean
      */
     public function isInWorkSchedule(\DateTime $dt, DSWorkSchedule $dsWorkSchedule): bool
     {
-        $date = $dt->format("Y-m-d");
         $dtTS = $dt->getTimestamp();
         $newDSWorkSchedule = $dsWorkSchedule->cloneIt();
         $newDSWorkSchedule->setStartingDay($dt->format("l"));
 
-        /** @var array $workDay */
-        foreach ($newDSWorkSchedule as $workDay) {
-            /** @var \TheClinicDataStructures\DataStructures\Time\DSTimePeriod $period */
-            foreach ($workDay as $period) {
-                if ($dtTS < $period->getEndTimestamp($date) && $dtTS >= $period->getStartTimestamp($date)) {
+        /** @var DSDateTimePeriods $periods */
+        foreach ($newDSWorkSchedule as $periods) {
+            /** @var DSDateTimePeriod $period */
+            foreach ($periods as $period) {
+                if ($dtTS < $period->getEndTimestamp() && $dtTS >= $period->getStartTimestamp()) {
                     return true;
                 }
             }
