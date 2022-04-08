@@ -12,6 +12,7 @@ use TheClinicDataStructures\DataStructures\Visit\DSVisits;
 use TheClinic\Visit\Utilities\SearchingBetweenTimeRange;
 use TheClinicDataStructures\DataStructures\Order\DSOrder;
 use TheClinicDataStructures\DataStructures\User\DSUser;
+use TheClinicDataStructures\DataStructures\Visit\Laser\DSLaserVisit;
 
 class SearchingBetweenTimeRangeTest extends TestCase
 {
@@ -38,48 +39,51 @@ class SearchingBetweenTimeRangeTest extends TestCase
     {
         $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 1800, new DSVisits("ASC"));
         $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime())->setTimestamp($timestamp)->getTimestamp());
+        $this->assertEquals((new \DateTime("00:00:00"))->getTimestamp(), $timestamp);
 
         $dsVisits = $this->makeFutureVisits(0);
 
         $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 1800, $dsVisits);
         $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime())->setTimestamp($timestamp)->getTimestamp());
+        $this->assertEquals((new \DateTime("00:00:00"))->getTimestamp(), $timestamp);
 
         $dsVisits = $this->makeFutureVisits(6);
 
         $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:10:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 1800, $dsVisits);
         $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("00:30:00"))->getTimestamp(), (new \DateTime())->setTimestamp($timestamp)->getTimestamp());
+        $this->assertEquals((new \DateTime("00:30:00"))->getTimestamp(), $timestamp);
+
+        $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:30:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 1800, $dsVisits);
+        $this->assertIsInt($timestamp);
+        $this->assertEquals((new \DateTime("00:30:00"))->getTimestamp(), $timestamp);
+
+        $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:40:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 1200, $dsVisits);
+        $this->assertIsInt($timestamp);
+        $this->assertEquals((new \DateTime("00:40:00"))->getTimestamp(), $timestamp);
 
         $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 1800, $dsVisits);
         $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("00:30:00"))->getTimestamp(), (new \DateTime())->setTimestamp($timestamp)->getTimestamp());
+        $this->assertEquals((new \DateTime("00:30:00"))->getTimestamp(), $timestamp);
 
         $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 3600, $dsVisits);
         $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("05:30:00"))->getTimestamp(), (new \DateTime())->setTimestamp($timestamp)->getTimestamp());
+        $this->assertEquals((new \DateTime("05:30:00"))->getTimestamp(), $timestamp);
 
         $dsVisits = $this->makeFutureVisits(11);
 
         $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 3600, $dsVisits);
         $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("10:30:00"))->getTimestamp(), (new \DateTime())->setTimestamp($timestamp)->getTimestamp());
+        $this->assertEquals((new \DateTime("10:30:00"))->getTimestamp(), $timestamp);
 
-        $visit = new \DateTime("11:40:00");
-        $dsVisits[] = new DSVisit(45, $this->user, $this->order, $visit->getTimestamp(), 1800, null, null, new \DateTime(), new \DateTime());
+        $dsVisits = $this->makeFutureVisits(10);
 
-        $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 3600, $dsVisits);
+        $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime("10:30:00"))->getTimestamp(), 3600, $dsVisits);
         $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("10:30:00"))->getTimestamp(), (new \DateTime())->setTimestamp($timestamp)->getTimestamp());
+        $this->assertEquals((new \DateTime("09:30:00"))->getTimestamp(), $timestamp);
 
-        $dsVisits = $this->makeFutureVisits(11);
-        $visit = new \DateTime("11:30:00");
-        $dsVisits[] = new DSVisit(45, $this->user, $this->order, $visit->getTimestamp(), 1800, null, null, new \DateTime(), new \DateTime());
-
-        $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime("12:00:00"))->getTimestamp(), 3600, $dsVisits);
+        $timestamp = (new SearchingBetweenTimeRange)->search((new \DateTime("00:00:00"))->getTimestamp(), (new \DateTime("11:10:00"))->getTimestamp(), 3600, $dsVisits);
         $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("10:30:00"))->getTimestamp(), (new \DateTime())->setTimestamp($timestamp)->getTimestamp());
+        $this->assertEquals((new \DateTime("09:30:00"))->getTimestamp(), $timestamp);
     }
 
     private function makeFutureVisits(int|null $exception = null): DSVisits
@@ -93,7 +97,7 @@ class SearchingBetweenTimeRangeTest extends TestCase
             }
 
             $visit = new \DateTime(strval($i) . ":00:00");
-            $dsVisits[] = new DSVisit($i, $this->user, $this->order, $visit->getTimestamp(), $consumingTime, null, null, new \DateTime(), new \DateTime());
+            $dsVisits[] = new DSLaserVisit($i, $visit->getTimestamp(), $consumingTime, new \DateTime(), new \DateTime());
         }
         return $dsVisits;
     }
