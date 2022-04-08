@@ -11,6 +11,8 @@ use TheClinic\Visit\IFindVisit;
 use TheClinic\Visit\Utilities\DownTime;
 use TheClinic\Visit\Utilities\SearchingBetweenDownTimes;
 use TheClinic\Visit\Utilities\WorkSchedule;
+use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriod;
+use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriods;
 
 class FastestVisit implements IFindVisit
 {
@@ -30,7 +32,7 @@ class FastestVisit implements IFindVisit
 
     private DownTime $downTime;
 
-    private int $recursiveSafetyLimit;
+    private string $oldSort;
 
     /**
      * Constructs a new instance.
@@ -54,6 +56,8 @@ class FastestVisit implements IFindVisit
     ) {
         $this->pointer = $startPoint;
         $this->consumingTime = $consumingTime;
+        $this->oldSort = $futureVisits->getSort();
+        $futureVisits->setSort('ASC');
         $this->futureVisits = $futureVisits;
         $this->dsWorkSchedule = $dsWorkSchedule;
         $this->dsDownTimes = $dsDownTimes;
@@ -65,79 +69,66 @@ class FastestVisit implements IFindVisit
 
     public function findVisit(): int
     {
-        return $this->finVisitRecursively();
-    }
+        $recursiveSafetyLimit = 0;
 
-    private function finVisitRecursively(bool $isTimeChecked = false): int
-    {
-        $this->recursiveSafetyLimit++;
-        if ($this->recursiveSafetyLimit > 500) {
-            throw new \RuntimeException("RECURSIVE LIMIT REACHED!!!", 500);
-        }
+        while (!isset($timestamp) && $recursiveSafetyLimit < 500) {
+            $newDSWorkSchedule = $this->dsWorkSchedule->cloneIt();
+            $newDSWorkSchedule->setStartingDay($this->pointer->format("l"));
 
-        if (!$isTimeChecked && $this->isTimeIncorrect($this->pointer, $this->dsDownTimes, $this->dsWorkSchedule)) {
-            $this->adjustTime($this->pointer, $this->dsDownTimes, $this->dsWorkSchedule);
-        }
+            /** @var DSDateTimePeriods $periods */
+            foreach ($newDSWorkSchedule as $weekDay => $periods) {
+                /** @var DSDateTimePeriod $period */
+                foreach ($periods as $period) {
+                    $periodStartTS = (new \DateTime($this->pointer->format('Y-m-d') . ' ' . $period->getStart()->format('H:i:s')))->getTimestamp();
+                    $periodEndTS = (new \DateTime($this->pointer->format('Y-m-d') . ' ' . $period->getEnd()->format('H:i:s')))->getTimestamp();
 
-        $date = $this->pointer->format("Y-m-d");
-        $newDSWorkSchedule = $this->dsWorkSchedule->cloneIt();
-        $newDSWorkSchedule->setStartingDay($this->pointer->format("l"));
-
-        /** @var \TheClinicDataStructures\DataStructures\Time\DSTimePeriods $periods */
-        foreach ($newDSWorkSchedule as $weekDay => $periods) {
-
-            /** @var \TheClinicDataStructures\DataStructures\Time\DSTimePeriod $period */
-            foreach ($periods as $period) {
-                if (
-                    ($this->pointer->getTimestamp() >= $period->getEndTimestamp($date)) ||
-                    ($this->pointer->getTimestamp() < $period->getStartTimestamp($date)) ||
-                    (($period->getEndTimestamp($date) - $this->pointer->getTimestamp()) < $this->consumingTime)
-                ) {
-                    continue;
-                }
-
-                try {
-                    return $this->SearchingBetweenDownTimes->search($this->pointer->getTimestamp(), $period->getEndTimestamp($date), $this->futureVisits, $this->dsDownTimes, $this->consumingTime);
-                } catch (VisitSearchFailure $th) {
-                } catch (NeededTimeOutOfRange $th) {
-                }
-
-                $periods->next();
-                if ($periods->valid()) {
-                    $this->pointer->setTimestamp($periods->current()->getStartTimestamp($date));
-                    $date = $this->pointer->format("Y-m-d");
-
-                    if ($this->isTimeIncorrect($this->pointer, $this->dsDownTimes, $this->dsWorkSchedule)) {
-                        $this->adjustTime($this->pointer, $this->dsDownTimes, $this->dsWorkSchedule);
-                        return $this->{__FUNCTION__}(true);
+                    if ($this->pointer->getTimestamp() > $periodEndTS) {
+                        continue;
                     }
 
-                    continue;
-                }
-
-                $newDSWorkSchedule->next();
-                if ($newDSWorkSchedule->valid()) {
-                    $date = $this->pointer->modify("+1 day")->format("Y-m-d");
-
-                    $this->pointer->setTimestamp($newDSWorkSchedule->current()[0]->getStartTimestamp($date));
-
-                    if ($this->isTimeIncorrect($this->pointer, $this->dsDownTimes, $this->dsWorkSchedule)) {
-                        $this->adjustTime($this->pointer, $this->dsDownTimes, $this->dsWorkSchedule);
-                        return $this->{__FUNCTION__}(true);
+                    if (($periodEndTS - $this->pointer->getTimestamp()) < $this->consumingTime) {
+                        continue;
                     }
 
-                    $newDSWorkSchedule->prev();
+                    if ($this->pointer->getTimestamp() <= $periodStartTS) {
+                        $firstTS = $periodStartTS;
+                    } else {
+                        $firstTS = $this->pointer->getTimestamp();
+                    }
+
+                    try {
+                        $timestamp = $this->SearchingBetweenDownTimes->search(
+                            $firstTS,
+                            $periodEndTS,
+                            $this->futureVisits,
+                            $this->dsDownTimes,
+                            $this->consumingTime
+                        );
+                        // For testing purposes
+                        $t = (new \DateTime)->setTimestamp($timestamp);
+                        break 2;
+                    } catch (VisitSearchFailure $th) {
+                    } catch (NeededTimeOutOfRange $th) {
+                    }
                 }
+                $this->pointer
+                    ->setTime(0, 0)
+                    ->modify('+1 day');
             }
+
+            $recursiveSafetyLimit++;
         }
 
-        $date = $this->pointer->modify("+1 day")->format("Y-m-d");
-        $this->pointer->setTimestamp($newDSWorkSchedule[$this->pointer->format("l")][0]->getStartTimestamp($date));
+        $this->futureVisits->setSort($this->oldSort);
 
-        return $this->{__FUNCTION__}();
+        if (isset($timestamp)) {
+            return $timestamp;
+        } else {
+            throw new \LogicException('Failed to find a visit time.', 500);
+        }
     }
 
-    private function isTimeIncorrect(\DateTime &$dt, DSDownTimes $dsDownTimes, DSWorkSchedule $dsWorkSchedule): bool
+    private function isTimeIncorrect(\DateTime $dt, DSDownTimes $dsDownTimes, DSWorkSchedule $dsWorkSchedule): bool
     {
         return $this->downTime->isInDownTime($dt, $dsDownTimes) || (!$this->workSchedule->isInWorkSchedule($dt, $dsWorkSchedule));
     }
@@ -146,8 +137,7 @@ class FastestVisit implements IFindVisit
     {
         do {
             $this->downTime->moveTimeToClosestUpTime($dt, $dsDownTimes);
-
             $this->workSchedule->movePointerToClosestWorkSchedule($dt, $dsWorkSchedule);
-        } while ($this->downTime->isInDownTime($dt, $dsDownTimes) || (!$this->workSchedule->isInWorkSchedule($dt, $dsWorkSchedule)));
+        } while ($this->isTimeIncorrect($dt, $dsDownTimes, $dsWorkSchedule));
     }
 }
