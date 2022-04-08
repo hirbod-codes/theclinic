@@ -40,25 +40,25 @@ class WorkScheduleTest extends TestCase
     {
         $dsWorkSchedule = $this->makeDSWorkSchedule();
 
-        $dt = new \DateTime("2020-10-05 09:00:00");
+        $dt = new \DateTime("09:00:00");
         $this->assertEquals(false, (new WorkSchedule)->isInWorkSchedule($dt, $dsWorkSchedule));
 
-        $dt = new \DateTime("2020-10-05 10:00:00");
+        $dt = new \DateTime("10:00:00");
         $this->assertEquals(true, (new WorkSchedule)->isInWorkSchedule($dt, $dsWorkSchedule));
 
-        $dt = new \DateTime("2020-10-05 10:20:00");
+        $dt = new \DateTime("10:20:00");
         $this->assertEquals(true, (new WorkSchedule)->isInWorkSchedule($dt, $dsWorkSchedule));
 
-        $dt = new \DateTime("2020-10-05 10:30:00");
+        $dt = new \DateTime("10:30:00");
         $this->assertEquals(false, (new WorkSchedule)->isInWorkSchedule($dt, $dsWorkSchedule));
 
-        $dt = new \DateTime("2020-10-05 10:40:00");
+        $dt = new \DateTime("10:40:00");
         $this->assertEquals(false, (new WorkSchedule)->isInWorkSchedule($dt, $dsWorkSchedule));
 
-        $dt = new \DateTime("2020-10-05 12:20:00");
+        $dt = new \DateTime("12:20:00");
         $this->assertEquals(true, (new WorkSchedule)->isInWorkSchedule($dt, $dsWorkSchedule));
 
-        $dt = new \DateTime("2020-10-05 14:30:00");
+        $dt = new \DateTime("14:30:00");
         $this->assertEquals(false, (new WorkSchedule)->isInWorkSchedule($dt, $dsWorkSchedule));
     }
 
@@ -66,24 +66,24 @@ class WorkScheduleTest extends TestCase
     {
         $dsWorkSchedule = $this->makeDSWorkSchedule();
 
-        $dt = new \DateTime("2020-10-05 09:00:00");
+        $dt = new \DateTime("09:00:00");
         (new WorkSchedule)->movePointerToClosestWorkSchedule($dt, $dsWorkSchedule);
-        $this->assertEquals("2020-10-05 10:00:00", $dt->format("Y-m-d H:i:s"));
+        $this->assertEquals((new \DateTime("10:00:00"))->format("Y-m-d H:i:s"), $dt->format("Y-m-d H:i:s"));
 
-        $dt = new \DateTime("2020-10-05 10:00:00");
+        $dt = new \DateTime("10:00:00");
         (new WorkSchedule)->movePointerToClosestWorkSchedule($dt, $dsWorkSchedule);
-        $this->assertEquals("2020-10-05 10:00:00", $dt->format("Y-m-d H:i:s"));
+        $this->assertEquals((new \DateTime("10:00:00"))->format("Y-m-d H:i:s"), $dt->format("Y-m-d H:i:s"));
 
-        $dt = new \DateTime("2020-10-05 10:20:00");
+        $dt = new \DateTime("10:20:00");
         (new WorkSchedule)->movePointerToClosestWorkSchedule($dt, $dsWorkSchedule);
-        $this->assertEquals("2020-10-05 10:20:00", $dt->format("Y-m-d H:i:s"));
+        $this->assertEquals((new \DateTime("10:20:00"))->format("Y-m-d H:i:s"), $dt->format("Y-m-d H:i:s"));
 
-        $dt = new \DateTime("2020-10-05 10:30:00");
+        $dt = new \DateTime("10:30:00");
         (new WorkSchedule)->movePointerToClosestWorkSchedule($dt, $dsWorkSchedule);
-        $this->assertEquals("2020-10-05 12:00:00", $dt->format("Y-m-d H:i:s"));
+        $this->assertEquals((new \DateTime("12:00:00"))->format("Y-m-d H:i:s"), $dt->format("Y-m-d H:i:s"));
 
-        $dt = new \DateTime("2020-10-05 14:30:00");
+        $dt = new \DateTime("14:30:00");
         (new WorkSchedule)->movePointerToClosestWorkSchedule($dt, $dsWorkSchedule);
-        $this->assertEquals("2020-10-06 10:00:00", $dt->format("Y-m-d H:i:s"));
+        $this->assertEquals((new \DateTime("10:00:00"))->modify('+1 day')->format("Y-m-d H:i:s"), $dt->format("Y-m-d H:i:s"));
     }
 }
