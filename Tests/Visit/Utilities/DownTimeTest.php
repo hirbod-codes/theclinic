@@ -24,7 +24,7 @@ class DownTimeTest extends TestCase
     {
         $customData = [];
         for ($i = 6; $i < 10; $i++) {
-            $customData[] = [new \DateTime("2020-10-5" . strval($i * 2) . ":00:00"), new \DateTime("2020-10-5" . strval($i * 2) . ":30:00")];
+            $customData[] = [new \DateTime("2020-10-5" . strval($i * 2) . ":00:00"), new \DateTime("2020-10-5" . strval($i * 2) . ":30:00"), $this->faker->lexify()];
         }
 
         return (new DSDownTimesFaker($customData))->fakeIt();
