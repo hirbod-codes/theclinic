@@ -30,95 +30,47 @@ class SearchingBetweenDownTimesTest extends TestCase
         $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
         $lastTS = (new \DateTime("2021-2-17 12:00:00"))->getTimestamp();
 
-        /** @var \TheClinic\Visit\Utilities\DownTime|\Mockery\MockInterface $downTime */
-        $downTime = Mockery::mock(DownTime::class);
-
-        $dsDownTimes = $this->makeDownTimes();
-        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
-        try {
-            $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), new DSDownTimes, 3600);
-            throw new \RuntimeException("Failure!!!", 500);
-        } catch (VisitSearchFailure $th) {
-        }
-
-        $firstTS = (new \DateTime("2021-2-17 00:10:00"))->getTimestamp();
-        $dsDownTimes = $this->makeDownTimes();
-        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
-        try {
-            $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), new DSDownTimes, 3600);
-            throw new \RuntimeException("Failure!!!", 500);
-        } catch (VisitSearchFailure $th) {
-        }
+        $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
+        $this->testsuccessfulSearch($firstTS, $lastTS, 3600, (new \DateTime("2021-2-17 10:30:00"))->getTimestamp(), 11);
         $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
 
-        $dsDownTimes = $this->makeDownTimes(11);
-        $dsDownTimes[] = new DSDownTime(new \DateTime("2021-2-17 11:30:00"), new \DateTime("2021-2-17 12:00:00"));
-        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
-        try {
-            $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), new DSDownTimes, 3600);
-            throw new \RuntimeException("Failure!!!", 500);
-        } catch (VisitSearchFailure $th) {
-        }
+        $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
+        $lastTS = (new \DateTime("2021-2-17 10:30:00"))->getTimestamp();
+        $this->testsuccessfulSearch($firstTS, $lastTS, 3600, (new \DateTime("2021-2-17 09:30:00"))->getTimestamp(), 10);
+        $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
+        $lastTS = (new \DateTime("2021-2-17 12:00:00"))->getTimestamp();
 
-        $dsDownTimes = $this->makeDownTimes(0);
-        /** @var \TheClinic\Visit\Utilities\DownTime|\Mockery\MockInterface $downTime */
-        $downTime = Mockery::mock(DownTime::class);
-        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
-        $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), new DSDownTimes, 3600);
-        $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("2021-2-17 00:00:00"))->getTimestamp(), $timestamp);
-
-        $firstTS = (new \DateTime("2021-2-17 00:10:00"))->getTimestamp();
-        $dsDownTimes = $this->makeDownTimes(1);
-        /** @var \TheClinic\Visit\Utilities\DownTime|\Mockery\MockInterface $downTime */
-        $downTime = Mockery::mock(DownTime::class);
-        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
-        $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), new DSDownTimes, 3600);
-        $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("2021-2-17 00:30:00"))->getTimestamp(), $timestamp);
+        $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
+        $this->testsuccessfulSearch($firstTS, $lastTS, 3600, (new \DateTime("2021-2-17 00:30:00"))->getTimestamp(), 1);
         $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
 
-        $dsDownTimes = $this->makeDownTimes(6);
-        /** @var \TheClinic\Visit\Utilities\DownTime|\Mockery\MockInterface $downTime */
-        $downTime = Mockery::mock(DownTime::class);
-        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
-        $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), new DSDownTimes, 3600);
-        $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("2021-2-17 5:30:00"))->getTimestamp(), $timestamp);
+        $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
+        $this->testsuccessfulSearch($firstTS, $lastTS, 3600, (new \DateTime("2021-2-17 04:30:00"))->getTimestamp(), 5);
+        $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
 
-        $dsDownTimes = $this->makeDownTimes(10);
-        /** @var \TheClinic\Visit\Utilities\DownTime|\Mockery\MockInterface $downTime */
-        $downTime = Mockery::mock(DownTime::class);
-        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
-        $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), new DSDownTimes, 3600);
-        $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("2021-2-17 09:30:00"))->getTimestamp(), $timestamp);
+        $firstTS = (new \DateTime("2021-2-17 00:10:00"))->getTimestamp();
+        $this->testsuccessfulSearch($firstTS, $lastTS, 3600, (new \DateTime("2021-2-17 00:30:00"))->getTimestamp(), 1);
+        $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
 
-        $dsDownTimes = $this->makeDownTimes(11);
-        /** @var \TheClinic\Visit\Utilities\DownTime|\Mockery\MockInterface $downTime */
-        $downTime = Mockery::mock(DownTime::class);
-        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
-        $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), new DSDownTimes, 3600);
-        $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("2021-2-17 10:30:00"))->getTimestamp(), $timestamp);
+        $firstTS = (new \DateTime("2021-2-17 00:30:00"))->getTimestamp();
+        $this->testsuccessfulSearch($firstTS, $lastTS, 3600, (new \DateTime("2021-2-17 00:30:00"))->getTimestamp(), 1);
+        $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
 
-        $dsDownTimes = $this->makeDownTimes(11);
-        $dsDownTimes[] = new DSDownTime(new \DateTime("2021-2-17 11:30:00"), new \DateTime("2021-2-17 12:00:00"));
-        /** @var \TheClinic\Visit\Utilities\DownTime|\Mockery\MockInterface $downTime */
-        $downTime = Mockery::mock(DownTime::class);
-        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
-        $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), new DSDownTimes, 3600);
-        $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("2021-2-17 10:30:00"))->getTimestamp(), $timestamp);
+        $firstTS = (new \DateTime("2021-2-17 00:40:00"))->getTimestamp();
+        $this->testsuccessfulSearch($firstTS, $lastTS, 3600, (new \DateTime("2021-2-17 00:40:00"))->getTimestamp(), 1);
+        $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
 
-        $dsDownTimes = $this->makeDownTimes(11);
-        $dsDownTimes[] = new DSDownTime(new \DateTime("2021-2-17 11:40:00"), new \DateTime("2021-2-17 12:10:00"));
-        /** @var \TheClinic\Visit\Utilities\DownTime|\Mockery\MockInterface $downTime */
-        $downTime = Mockery::mock(DownTime::class);
-        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
-        $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), new DSDownTimes, 3600);
-        $this->assertIsInt($timestamp);
-        $this->assertEquals((new \DateTime("2021-2-17 10:30:00"))->getTimestamp(), $timestamp);
+        $firstTS = (new \DateTime("2021-2-17 00:30:00"))->getTimestamp();
+        $lastTS = (new \DateTime("2021-2-17 00:50:00"))->getTimestamp();
+        $this->testsuccessfulSearch($firstTS, $lastTS, 1200, (new \DateTime("2021-2-17 00:30:00"))->getTimestamp());
+        $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
+        $lastTS = (new \DateTime("2021-2-17 12:00:00"))->getTimestamp();
+
+        $firstTS = (new \DateTime("2021-2-17 00:10:00"))->getTimestamp();
+        $lastTS = (new \DateTime("2021-2-17 00:30:00"))->getTimestamp();
+        $this->testFailingSearch($firstTS, $lastTS, 1200);
+        $firstTS = (new \DateTime("2021-2-17 00:00:00"))->getTimestamp();
+        $lastTS = (new \DateTime("2021-2-17 12:00:00"))->getTimestamp();
     }
 
     private function makeDownTimes(int|null $exception = null): DSDownTimes
@@ -128,9 +80,39 @@ class SearchingBetweenDownTimesTest extends TestCase
                 continue;
             }
 
-            $customData[] = [new \DateTime("2021-2-17" . strval($i) . ":00:00"), new \DateTime("2021-2-17" . strval($i) . ":30:00")];
+            $customData[] = [new \DateTime("2021-2-17" . strval($i) . ":00:00"), new \DateTime("2021-2-17" . strval($i) . ":30:00"), $this->faker->lexify()];
         }
 
         return (new DSDownTimesFaker($customData))->fakeIt();
+    }
+
+    private function testsuccessfulSearch(int $firstTS, int $lastTS, int $consumingTime, int $expectedTimestamp, int|null $exception = null): void
+    {
+        $dsDownTimes = $this->makeDownTimes($exception);
+        /** @var \TheClinic\Visit\Utilities\DownTime|\Mockery\MockInterface $downTime */
+        $downTime = Mockery::mock(DownTime::class);
+        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
+        $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), $dsDownTimes, $consumingTime);
+        $this->assertIsInt($timestamp);
+        $this->assertEquals($expectedTimestamp, $timestamp);
+    }
+
+    private function testFailingSearch(int $firstTS, int $lastTS, int $consumingTime, int|null $exception = null): void
+    {
+        $dsDownTimes = $this->makeDownTimes($exception);
+        /** @var \TheClinic\Visit\Utilities\DownTime|\Mockery\MockInterface $downTime */
+        $downTime = Mockery::mock(DownTime::class);
+        $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
+        try {
+            $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search(
+                $firstTS,
+                $lastTS,
+                new DSVisits("ASC"),
+                new DSDownTimes,
+                $consumingTime
+            );
+            throw new \RuntimeException("Failure!!!", 500);
+        } catch (VisitSearchFailure $th) {
+        }
     }
 }
