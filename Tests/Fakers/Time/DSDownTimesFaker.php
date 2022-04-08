@@ -14,7 +14,7 @@ class DSDownTimesFaker
     /**
      * Default is two downTimes("09:00:00"-"12:00:00", "17:00:00"-"20:00:00") in 5 days, starting from today.
      * 
-     * @param array|null $customData [[\DateTime $start, \DateTime $end], ...]
+     * @param array|null $customData [[\DateTime $start, \DateTime $end, string $name], ...]
      */
     public function __construct(array|null $customData = null)
     {
@@ -39,7 +39,7 @@ class DSDownTimesFaker
         $dsDownTimes = new DSDownTimes;
 
         foreach ($this->customData as $period) {
-            $dsDownTime = new DSDownTime($period[0], $period[1]);
+            $dsDownTime = new DSDownTime($period[0], $period[1], $period[2]);
 
             $dsDownTimes[] = $dsDownTime;
         }
@@ -62,12 +62,12 @@ class DSDownTimesFaker
         for ($i = 0; $i < 5; $i++) {
             $start = new \DateTime($date . strval($today + $i) . "09:00:00");
             $end = new \DateTime($date . strval($today + $i) . "12:00:00");
-            $dsDownTime = new DSDownTime($start, $end);
+            $dsDownTime = new DSDownTime($start, $end, 'fake');
             $dsDownTimes[] = $dsDownTime;
 
             $start = new \DateTime($date . strval($today + $i) . "17:00:00");
             $end = new \DateTime($date . strval($today + $i) . "20:00:00");
-            $dsDownTime = new DSDownTime($start, $end);
+            $dsDownTime = new DSDownTime($start, $end, 'fake');
             $dsDownTimes[] = $dsDownTime;
         }
 
