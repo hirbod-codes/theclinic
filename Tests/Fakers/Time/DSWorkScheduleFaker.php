@@ -2,8 +2,8 @@
 
 namespace Tests\Fakers\Time;
 
-use TheClinicDataStructures\DataStructures\Time\DSTimePeriod;
-use TheClinicDataStructures\DataStructures\Time\DSTimePeriods;
+use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriod;
+use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriods;
 use TheClinicDataStructures\DataStructures\Time\DSWorkSchedule;
 
 class DSWorkScheduleFaker
@@ -38,16 +38,21 @@ class DSWorkScheduleFaker
     {
         $dsWorkSchedule = new DSWorkSchedule("Monday");
 
+        $counter = 0;
         foreach ($this->customData as $weekDay => $periods) {
-            $dsTimePeriods = new DSTimePeriods;
+            $dsDateTimePeriods = new DSDateTimePeriods;
 
             foreach ($periods as $period) {
-                $dsTimePeriod = new DSTimePeriod($period[0], $period[1]);
+                $dsDateTimePeriod = new DSDateTimePeriod(
+                    ($dt = (new \DateTime($period[0]))->modify('+' . $counter . ' days')),
+                    (new \DateTime($period[1]))->modify('+' . $counter . ' days')
+                );
 
-                $dsTimePeriods[] = $dsTimePeriod;
+                $dsDateTimePeriods[] = $dsDateTimePeriod;
             }
 
-            $dsWorkSchedule[$weekDay] = $dsTimePeriods;
+            $dsWorkSchedule[$dt->format("l")] = $dsDateTimePeriods;
+            $counter++;
         }
 
         return $dsWorkSchedule;
@@ -55,18 +60,31 @@ class DSWorkScheduleFaker
 
     private function fakeWithDefaultData(): DSWorkSchedule
     {
-        $dsWorkSchedule = new DSWorkSchedule("Monday");
+        $dsWorkSchedule = new DSWorkSchedule((new \DateTime)->format('l'));
 
         for ($i = 0; $i < 7; $i++) {
-            $dsTimePeriods = new DSTimePeriods;
+            $dsDateTimePeriods = new DSDateTimePeriods;
 
-            $dsTimePeriod = new DSTimePeriod("08:00:00", "14:00:00");
-            $dsTimePeriods[] = $dsTimePeriod;
+            $dsDateTimePeriod = new DSDateTimePeriod(
+                ($dt = (new \DateTime("00:00:00"))->modify('+' . $i . ' days')),
+                (new \DateTime("6:00:00"))->modify('+' . $i . ' days')
+            );
+            $dsDateTimePeriods[] = $dsDateTimePeriod;
 
-            $dsTimePeriod = new DSTimePeriod("16:00:00", "23:00:00");
-            $dsTimePeriods[] = $dsTimePeriod;
+            $dsDateTimePeriod = new DSDateTimePeriod(
+                ($dt = (new \DateTime("08:00:00"))->modify('+' . $i . ' days')),
+                (new \DateTime("14:00:00"))->modify('+' . $i . ' days')
+            );
+            $dsDateTimePeriods[] = $dsDateTimePeriod;
 
-            $dsWorkSchedule[DSWorkSchedule::$weekDays[$i]] = $dsTimePeriods;
+            $dsDateTimePeriod = new DSDateTimePeriod(
+                (new \DateTime("16:00:00"))->modify('+' . $i . ' days'),
+                (new \DateTime("23:00:00"))->modify('+' . $i . ' days')
+            );
+
+            $dsDateTimePeriods[] = $dsDateTimePeriod;
+
+            $dsWorkSchedule[$dt->format("l")] = $dsDateTimePeriods;
         }
 
         return $dsWorkSchedule;
