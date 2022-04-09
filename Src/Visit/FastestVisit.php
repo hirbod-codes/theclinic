@@ -9,7 +9,9 @@ use TheClinic\Exceptions\Visit\NeededTimeOutOfRange;
 use TheClinic\Exceptions\Visit\VisitSearchFailure;
 use TheClinic\Visit\IFindVisit;
 use TheClinic\Visit\Utilities\DownTime;
+use TheClinic\Visit\Utilities\SearchBetweenTimestamps;
 use TheClinic\Visit\Utilities\SearchingBetweenDownTimes;
+use TheClinic\Visit\Utilities\SearchingBetweenTimeRange;
 use TheClinic\Visit\Utilities\WorkSchedule;
 use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriod;
 use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriods;
@@ -36,13 +38,15 @@ class FastestVisit implements IFindVisit
 
     /**
      * Constructs a new instance.
-     *
-     * @param integer $initialTimeSkip
+     * 
+     * @param \DateTime $startPoint
      * @param integer $consumingTime
      * @param DSVisits $futureVisits
      * @param DSWorkSchedule $dsWorkSchedule
      * @param DSDownTimes $dsDownTimes
      * @param SearchingBetweenDownTimes $SearchingBetweenDownTimes
+     * @param WorkSchedule $workSchedule
+     * @param DownTime $downTime
      */
     public function __construct(
         \DateTime $startPoint,
@@ -50,9 +54,9 @@ class FastestVisit implements IFindVisit
         DSVisits $futureVisits,
         DSWorkSchedule $dsWorkSchedule,
         DSDownTimes $dsDownTimes,
-        SearchingBetweenDownTimes $SearchingBetweenDownTimes,
-        WorkSchedule $workSchedule,
-        DownTime $downTime
+        null|SearchingBetweenDownTimes $SearchingBetweenDownTimes = null,
+        null|WorkSchedule $workSchedule = null,
+        null|DownTime $downTime = null
     ) {
         $this->pointer = $startPoint;
         $this->consumingTime = $consumingTime;
@@ -61,10 +65,9 @@ class FastestVisit implements IFindVisit
         $this->futureVisits = $futureVisits;
         $this->dsWorkSchedule = $dsWorkSchedule;
         $this->dsDownTimes = $dsDownTimes;
-        $this->SearchingBetweenDownTimes = $SearchingBetweenDownTimes;
-        $this->workSchedule = $workSchedule;
-        $this->downTime = $downTime;
-        $this->recursiveSafetyLimit = 0;
+        $this->SearchingBetweenDownTimes = $SearchingBetweenDownTimes ?: new SearchingBetweenDownTimes();
+        $this->workSchedule = $workSchedule ?: new workSchedule;
+        $this->downTime = $downTime ?: new DownTime;
     }
 
     public function findVisit(): int
