@@ -36,18 +36,6 @@ class FastestVisit implements IFindVisit
 
     private string $oldSort;
 
-    /**
-     * Constructs a new instance.
-     * 
-     * @param \DateTime $startPoint
-     * @param integer $consumingTime
-     * @param DSVisits $futureVisits
-     * @param DSWorkSchedule $dsWorkSchedule
-     * @param DSDownTimes $dsDownTimes
-     * @param SearchingBetweenDownTimes $SearchingBetweenDownTimes
-     * @param WorkSchedule $workSchedule
-     * @param DownTime $downTime
-     */
     public function __construct(
         \DateTime $startPoint,
         int $consumingTime,
