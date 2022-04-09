@@ -153,10 +153,7 @@ class FastestVisitTest extends TestCase
             $consumingTime,
             $this->dsVisits,
             $dsWorkSchedule,
-            $dsDownTimes,
-            new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, new DownTime),
-            new WorkSchedule,
-            new DownTime
+            $dsDownTimes
         ))->findVisit();
     }
 
