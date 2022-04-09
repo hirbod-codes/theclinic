@@ -9,6 +9,14 @@ use TheClinicDataStructures\DataStructures\Visit\DSVisit;
 
 class SearchingBetweenTimeRange
 {
+    private SearchBetweenTimestamps $searchBetweenTimestamps;
+
+    public function __construct(
+        null|SearchBetweenTimestamps $searchBetweenTimestamps = null,
+    ) {
+        $this->searchBetweenTimestamps = $searchBetweenTimestamps ?: new SearchBetweenTimestamps;
+    }
+
     public function search(int $firstTS, int $lastTS, int $consumingTime, DSVisits $futureVisits): int
     {
         // For testing purposes
@@ -17,60 +25,26 @@ class SearchingBetweenTimeRange
 
         $this->validateTimeRange($firstTS, $lastTS, $consumingTime);
 
-        if (count($futureVisits) === 0) {
-            return $firstTS;
-        }
-
-        /** @var \TheClinicDataStructures\DataStructures\Visit\DSVisit $visit */
-        foreach ($futureVisits as $visit) {
-            $visitEnd = $visit->getVisitTimestamp() + $visit->getConsumingTime();
-
-            if ($visit->getVisitTimestamp() <= $firstTS && $visitEnd >= $lastTS) {
-                throw new VisitSearchFailure("Failed to find a visit in requested time range.", 500);
+        foreach ($this->searchBetweenTimestamps->search(
+            $firstTS,
+            $lastTS,
+            $consumingTime,
+            $futureVisits,
+            function (DSVisit $visit): int {
+                return $visit->getVisitTimestamp();
+            },
+            function (DSVisit $visit): int {
+                return $visit->getVisitTimestamp() + $visit->getConsumingTime();
             }
+        ) as $array) {
+            $previousBlock = $array[0];
+            $currentBlock = $array[1];
 
-            if ($visitEnd <= $firstTS) {
-                continue;
-            } elseif ($visit->getVisitTimestamp() <= $firstTS) {
-                $firstTS = $visitEnd;
-                $this->validateTimeRange($firstTS, $lastTS, $consumingTime);
-                continue;
-            }
+            // For testing purposes
+            $previousBlockDT = (new \DateTime)->setTimestamp($previousBlock);
+            $currentBlockDT = (new \DateTime)->setTimestamp($currentBlock);
 
-            if (isset($previousVisit)) {
-                $previousBlock = $previousVisit->getVisitTimestamp() + $previousVisit->getConsumingTime();
-            } else {
-                $previousBlock = $firstTS;
-            }
-
-            if ($visit->getVisitTimestamp() > $lastTS) {
-                $currentBlock = $lastTS;
-            } else {
-                $currentBlock = $visit->getVisitTimestamp();
-            }
-
-            if (
-                $previousBlock >= $firstTS &&
-                $currentBlock <= $lastTS &&
-                ($currentBlock - $previousBlock) >= $consumingTime
-            ) {
-                return $previousBlock;
-            }
-
-            /** @var DSVisit $visit */
-            $previousVisit = $visit;
-
-            if (($visitEnd + $consumingTime) > $lastTS) {
-                break;
-            }
-        }
-
-        if ($visitEnd < $lastTS) {
-            if ($visitEnd >= $firstTS && ($lastTS - $visitEnd) >= $consumingTime) {
-                return $visitEnd;
-            } else {
-                return $firstTS;
-            }
+            return $previousBlock;
         }
 
         throw new VisitSearchFailure("Failed to find a visit in requested time range.", 500);
