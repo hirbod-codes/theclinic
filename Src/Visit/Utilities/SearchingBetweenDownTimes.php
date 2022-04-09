@@ -10,14 +10,20 @@ use TheClinicDataStructures\DataStructures\Time\DSDownTime;
 
 class SearchingBetweenDownTimes
 {
-    private SearchingBetweenTimeRange $SearchingBetweenTimeRange;
+    private SearchingBetweenTimeRange $searchingBetweenTimeRange;
 
-    private DownTime $dowTime;
+    private SearchBetweenTimestamps $searchBetweenTimestamps;
 
-    public function __construct(SearchingBetweenTimeRange $SearchingBetweenTimeRange, DownTime $dowTime)
-    {
-        $this->SearchingBetweenTimeRange = $SearchingBetweenTimeRange;
-        $this->dowTime = $dowTime;
+    private DownTime $downTime;
+
+    public function __construct(
+        null|SearchBetweenTimestamps $searchBetweenTimestamps = null,
+        null|SearchingBetweenTimeRange $searchingBetweenTimeRange = null,
+        null|DownTime $downTime = null
+    ) {
+        $this->searchBetweenTimestamps = $searchBetweenTimestamps ?: new SearchBetweenTimestamps;
+        $this->searchingBetweenTimeRange = $searchingBetweenTimeRange ?: new SearchingBetweenTimeRange;
+        $this->downTime = $downTime ?: new DownTime;
     }
 
     public function search(int $firstTS, int $lastTS, DSVisits $futureVisits, DSDownTimes $dsDownTimes, int $consumingTime): int
@@ -28,71 +34,31 @@ class SearchingBetweenDownTimes
 
         $this->validateTimeRange($firstTS, $lastTS, $consumingTime);
 
-        $intruptingDSDownTimes = $this->dowTime->findDownTimeIntruptionWithTimeRange($firstTS, $lastTS, $dsDownTimes);
+        $intruptingDSDownTimes = $this->downTime->findDownTimeIntruptionWithTimeRange($firstTS, $lastTS, $dsDownTimes);
 
-        if (count($intruptingDSDownTimes) === 0) {
-            return $this->SearchingBetweenTimeRange->search($firstTS, $lastTS, $consumingTime, $futureVisits);
-        } else {
-            $newDSDownTimes = $intruptingDSDownTimes->cloneIt();
-
-            /** @var \TheClinicDataStructures\DataStructures\Time\DSDownTime $dsDownTime */
-            foreach ($newDSDownTimes as $dsDownTime) {
-                if ($dsDownTime->getStartTimestamp() <= $firstTS && $dsDownTime->getEndTimestamp() >= $lastTS) {
-                    throw new VisitSearchFailure("Failed to find a visit in the requested time range.", 500);
-                }
-
-                if ($dsDownTime->getEndTimestamp() <= $firstTS) {
-                    continue;
-                } elseif ($dsDownTime->getStartTimestamp() <= $firstTS) {
-                    $firstTS = $dsDownTime->getEndTimestamp();
-                    $this->validateTimeRange($firstTS, $lastTS, $consumingTime);
-                    continue;
-                }
-
-                if (isset($previousDSDownTime)) {
-                    $previousBlock = $previousDSDownTime->getEndTimestamp();
-                } else {
-                    $previousBlock = $firstTS;
-                }
-
-                if ($dsDownTime->getStartTimestamp() > $lastTS) {
-                    $currentBlock = $lastTS;
-                } else {
-                    $currentBlock = $dsDownTime->getStartTimestamp();
-                }
-
-                if (
-                    $previousBlock >= $firstTS &&
-                    $currentBlock <= $lastTS &&
-                    ($currentBlock - $previousBlock) >= $consumingTime
-                ) {
-                    try {
-                        return $this->SearchingBetweenTimeRange->search($previousBlock, $currentBlock, $consumingTime, $futureVisits);
-                    } catch (VisitSearchFailure $th) {
-                    } catch (NeededTimeOutOfRange $th) {
-                    }
-                }
-
-                /** @var DSDownTime $previousDSDownTime */
-                $previousDSDownTime = $dsDownTime;
-
-                if ($dsDownTime->getEndTimestamp() > $lastTS) {
-                    break;
-                }
+        foreach ($this->searchBetweenTimestamps->search(
+            $firstTS,
+            $lastTS,
+            $consumingTime,
+            $intruptingDSDownTimes->cloneIt(),
+            function (DSDownTime $dsDownTime): int {
+                return $dsDownTime->getStartTimestamp();
+            },
+            function (DSDownTime $dsDownTime): int {
+                return $dsDownTime->getEndTimestamp();
             }
+        ) as $array) {
+            $previousBlock = $array[0];
+            $currentBlock = $array[1];
 
-            if ($dsDownTime->getEndTimestamp() < $lastTS) {
-                if ($dsDownTime->getEndTimestamp() >= $firstTS && ($lastTS - $dsDownTime->getEndTimestamp()) >= $consumingTime) {
-                    $previousBlock = $dsDownTime->getEndTimestamp();
-                } else {
-                    $previousBlock = $firstTS;
-                }
+            // For testing purposes
+            $previousBlockDT = (new \DateTime)->setTimestamp($previousBlock);
+            $currentBlockDT = (new \DateTime)->setTimestamp($currentBlock);
 
-                try {
-                    return $this->SearchingBetweenTimeRange->search($dsDownTime->getEndTimestamp(), $lastTS, $consumingTime, $futureVisits);
-                } catch (VisitSearchFailure $th) {
-                } catch (NeededTimeOutOfRange $th) {
-                }
+            try {
+                return $this->searchingBetweenTimeRange->search($previousBlock, $currentBlock, $consumingTime, $futureVisits);
+            } catch (VisitSearchFailure $th) {
+            } catch (NeededTimeOutOfRange $th) {
             }
         }
 
