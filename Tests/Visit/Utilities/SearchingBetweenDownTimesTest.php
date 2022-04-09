@@ -7,6 +7,7 @@ use Faker\Generator;
 use Mockery;
 use Tests\TestCase;
 use Tests\Fakers\Time\DSDownTimesFaker;
+use TheClinic\Exceptions\Visit\NeededTimeOutOfRange;
 use TheClinicDataStructures\DataStructures\Time\DSDownTime;
 use TheClinicDataStructures\DataStructures\Time\DSDownTimes;
 use TheClinicDataStructures\DataStructures\Visit\DSVisits;
@@ -92,7 +93,7 @@ class SearchingBetweenDownTimesTest extends TestCase
         /** @var \TheClinic\Visit\Utilities\DownTime|\Mockery\MockInterface $downTime */
         $downTime = Mockery::mock(DownTime::class);
         $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
-        $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), $dsDownTimes, $consumingTime);
+        $timestamp = (new SearchingBetweenDownTimes(null, null, $downTime))->search($firstTS, $lastTS, new DSVisits("ASC"), $dsDownTimes, $consumingTime);
         $this->assertIsInt($timestamp);
         $this->assertEquals($expectedTimestamp, $timestamp);
     }
@@ -104,7 +105,7 @@ class SearchingBetweenDownTimesTest extends TestCase
         $downTime = Mockery::mock(DownTime::class);
         $downTime->shouldReceive("findDownTimeIntruptionWithTimeRange")->andReturn($dsDownTimes);
         try {
-            $timestamp = (new SearchingBetweenDownTimes(new SearchingBetweenTimeRange, $downTime))->search(
+            $timestamp = (new SearchingBetweenDownTimes(null, null, $downTime))->search(
                 $firstTS,
                 $lastTS,
                 new DSVisits("ASC"),
