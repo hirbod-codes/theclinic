@@ -11,10 +11,6 @@ use TheClinicDataStructures\DataStructures\Time\DSDownTimes;
 use TheClinicDataStructures\DataStructures\Time\DSWorkSchedule;
 use TheClinicDataStructures\DataStructures\Visit\DSVisits;
 use TheClinic\Visit\FastestVisit;
-use TheClinic\Visit\Utilities\DownTime;
-use TheClinic\Visit\Utilities\SearchingBetweenDownTimes;
-use TheClinic\Visit\Utilities\SearchingBetweenTimeRange;
-use TheClinic\Visit\Utilities\WorkSchedule;
 use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriod;
 use TheClinicDataStructures\DataStructures\Time\DSDownTime;
 use TheClinicDataStructures\DataStructures\Visit\DSVisit;
@@ -23,6 +19,7 @@ use TheClinicDataStructures\DataStructures\Visit\Laser\DSLaserVisit;
 class FastestVisitTest extends TestCase
 {
     private Generator $faker;
+    
     private DSVisits $dsVisits;
 
     protected function setUp(): void
@@ -36,7 +33,7 @@ class FastestVisitTest extends TestCase
     public function testMultiFindVisit(): void
     {
         try {
-            $visitsCount = 500;
+            $visitsCount = 100;
             $futureDays = 4;
 
             $t = explode(' ', microtime());
