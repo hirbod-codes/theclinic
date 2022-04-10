@@ -27,7 +27,7 @@ class ValidateTimeRanges
         }
 
         if (!$found) {
-            throw new \RuntimeException('There is not enough time for this order in the given work schedule.', 500);
+            throw new NeededTimeOutOfRange('There is not enough time for this order in the given work schedule.', 500);
         }
     }
 
