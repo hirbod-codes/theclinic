@@ -71,7 +71,11 @@ class WeeklyVisit implements IFindVisit
              * @var string $weekDay
              */
             foreach ($this->dsWeekDaysPeriods as $weekDay => $dsWeekDayPeriods) {
-                $timestamp = $this->iterateDSWeekDayPeriods($dsWeekDayPeriods, $weekDay);
+                try {
+                    $timestamp = $this->iterateDSWeekDayPeriods($dsWeekDayPeriods, $weekDay);
+                } catch (NeededTimeOutOfRange $th) {
+                    continue;
+                }
 
                 if ((new \DateTime)->setTimestamp($timestamp)->format('l') !== $weekDay) {
                     throw new \LogicException('The founded visit time doesn\'t match with provided information.', 500);
@@ -121,12 +125,8 @@ class WeeklyVisit implements IFindVisit
     {
         /** @var DSDateTimePeriod $dsWeekDayPeriod */
         foreach ($dsWeekDayPeriods as $dsWeekDayPeriod) {
-            try {
-                $this->validateTimeRanges->checkConsumingTimeInTimeRange($dsWeekDayPeriod->getStartTimestamp(), $dsWeekDayPeriod->getEndTimestamp(), $this->consumingTime);
-                $this->validateTimeRanges->checkConsumingTimeInWorkSchedule($this->dsWorkSchedule, $this->consumingTime);
-            } catch (NeededTimeOutOfRange $th) {
-                continue;
-            }
+            $this->validateTimeRanges->checkConsumingTimeInTimeRange($dsWeekDayPeriod->getStartTimestamp(), $dsWeekDayPeriod->getEndTimestamp(), $this->consumingTime);
+            $this->validateTimeRanges->checkConsumingTimeInWorkSchedule($this->dsWorkSchedule, $this->consumingTime);
 
             return $this->iterateDSWorkSchedule($dsWeekDayPeriod, $weekDay);
         }
