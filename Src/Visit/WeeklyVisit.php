@@ -33,6 +33,8 @@ class WeeklyVisit implements IFindVisit
 
     private string $oldSort;
 
+    private bool $enoughTimeExists;
+
     public function __construct(
         DSWeekDaysPeriods $dsWeekDaysPeriods,
         int $consumingTime,
@@ -43,6 +45,7 @@ class WeeklyVisit implements IFindVisit
         null|SearchingBetweenDownTimes $SearchingBetweenDownTimes = null,
         null|ValidateTimeRanges $validateTimeRanges = null
     ) {
+        $this->enoughTimeExists = false;
         $this->dsWeekDaysPeriods = $dsWeekDaysPeriods;
         $this->consumingTime = $consumingTime;
 
@@ -89,6 +92,10 @@ class WeeklyVisit implements IFindVisit
      */
     private function findClosestTimestamp(array $timestamps): int
     {
+        if (!$this->enoughTimeExists) {
+            throw new NeededTimeOutOfRange('', 500);
+        }
+
         if (empty($timestamps)) {
             throw new \LogicException('Failed to find a visit time.', 500);
         }
@@ -182,6 +189,13 @@ class WeeklyVisit implements IFindVisit
             $currentBlock = $dsWeekDayPeriod->getEndTimestamp();
         } else {
             $currentBlock = $dsWorkSchedulePeriod->getEndTimestamp();
+        }
+
+        try {
+            $this->validateTimeRanges->checkConsumingTimeInTimeRange($previousBlock, $currentBlock, $this->consumingTime);
+            $this->enoughTimeExists = true;
+        } catch (NeededTimeOutOfRange $th) {
+            throw $th;
         }
 
         return $this->SearchingBetweenDownTimes->search(
