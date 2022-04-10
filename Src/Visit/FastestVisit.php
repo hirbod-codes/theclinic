@@ -60,6 +60,7 @@ class FastestVisit implements IFindVisit
 
     public function findVisit(): int
     {
+        $this->checkConsumingTimeInWorkSchedule();
         $recursiveSafetyLimit = 0;
 
         while (!isset($timestamp) && $recursiveSafetyLimit < 500) {
@@ -77,14 +78,14 @@ class FastestVisit implements IFindVisit
                         continue;
                     }
 
-                    if (($periodEndTS - $this->pointer->getTimestamp()) < $this->consumingTime) {
-                        continue;
-                    }
-
                     if ($this->pointer->getTimestamp() <= $periodStartTS) {
                         $firstTS = $periodStartTS;
                     } else {
                         $firstTS = $this->pointer->getTimestamp();
+                    }
+
+                    if (($periodEndTS - $firstTS) < $this->consumingTime) {
+                        continue;
                     }
 
                     try {
@@ -119,16 +120,24 @@ class FastestVisit implements IFindVisit
         }
     }
 
-    private function isTimeIncorrect(\DateTime $dt, DSDownTimes $dsDownTimes, DSWorkSchedule $dsWorkSchedule): bool
+    private function checkConsumingTimeInWorkSchedule(): void
     {
-        return $this->downTime->isInDownTime($dt, $dsDownTimes) || (!$this->workSchedule->isInWorkSchedule($dt, $dsWorkSchedule));
-    }
+        $found = false;
+        /**
+         * @var string $weekDay
+         * @var DSDateTimePeriods $dsDateTimePeriods
+         */
+        foreach ($this->dsWorkSchedule as $weekDay => $dsDateTimePeriods) {
+            /** @var DSDateTimePeriod $dsDateTimePeriod */
+            foreach ($dsDateTimePeriods as $dsDateTimePeriod) {
+                if (($dsDateTimePeriod->getEndTimestamp() - $dsDateTimePeriod->getStartTimestamp()) >= $this->consumingTime) {
+                    $found = true;
+                }
+            }
+        }
 
-    private function adjustTime(\DateTime &$dt, DSDownTimes $dsDownTimes, DSWorkSchedule $dsWorkSchedule): void
-    {
-        do {
-            $this->downTime->moveTimeToClosestUpTime($dt, $dsDownTimes);
-            $this->workSchedule->movePointerToClosestWorkSchedule($dt, $dsWorkSchedule);
-        } while ($this->isTimeIncorrect($dt, $dsDownTimes, $dsWorkSchedule));
+        if (!$found) {
+            throw new \RuntimeException('There is not enough time for this order in the given work schedule.', 500);
+        }
     }
 }
