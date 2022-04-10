@@ -114,6 +114,7 @@ class SearchingBetweenDownTimesTest extends TestCase
             );
             throw new \RuntimeException("Failure!!!", 500);
         } catch (VisitSearchFailure $th) {
+        } catch (NeededTimeOutOfRange $th) {
         }
     }
 }
