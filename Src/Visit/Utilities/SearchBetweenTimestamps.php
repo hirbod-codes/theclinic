@@ -3,14 +3,20 @@
 namespace TheClinic\Visit\Utilities;
 
 use TheClinic\Exceptions\Visit\NeededTimeOutOfRange;
-use TheClinic\Exceptions\Visit\VisitSearchFailure;
 
 class SearchBetweenTimestamps
 {
+    private ValidateTimeRanges $validateTimeRanges;
+
+    public function __construct(null|ValidateTimeRanges $validateTimeRanges = null)
+    {
+        $this->validateTimeRanges = $validateTimeRanges ?: new ValidateTimeRanges;
+    }
+
     public function search(int $startTS, int $endTS, int $neededTime, \ArrayAccess|\Countable $arrayAccess, array|\Closure $getItemStartTS, array|\Closure $getItemEndTS): \Generator
     {
         $this->validateArrayAccess($arrayAccess);
-        $this->validateTimestamps($startTS, $endTS, $neededTime);
+        $this->validateTimeRanges->checkConsumingTimeInTimeRange($startTS, $endTS, $neededTime);
         $this->confirmIntReturnType($getItemEndTS);
         $this->confirmIntReturnType($getItemStartTS);
 
@@ -31,7 +37,7 @@ class SearchBetweenTimestamps
                 continue;
             } elseif ($itemStartTS <= $startTS) {
                 $startTS = $itemEndTS;
-                $this->validateTimestamps($startTS, $endTS, $neededTime);
+                $this->validateTimeRanges->checkConsumingTimeInTimeRange($startTS, $endTS, $neededTime);
                 continue;
             }
 
@@ -83,17 +89,6 @@ class SearchBetweenTimestamps
             !($arrayAccess instanceof \Countable)
         ) {
             throw new \InvalidArgumentException('The varable $arrayAccess doesn\'t implement required interfaces.', 500);
-        }
-    }
-
-    private function validateTimestamps(int $startTS, int $endTS, int $neededTime): void
-    {
-        if ($endTS <= $startTS) {
-            throw new VisitSearchFailure("Failed to find a visit in requested time range.", 500);
-        }
-
-        if (($endTS - $startTS) < $neededTime) {
-            throw new NeededTimeOutOfRange('', 500);
         }
     }
 

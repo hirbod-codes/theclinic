@@ -4,9 +4,8 @@ namespace TheClinic\Visit;
 
 use TheClinic\Exceptions\Visit\NeededTimeOutOfRange;
 use TheClinic\Exceptions\Visit\VisitSearchFailure;
-use TheClinic\Visit\Utilities\DownTime;
 use TheClinic\Visit\Utilities\SearchingBetweenDownTimes;
-use TheClinic\Visit\Utilities\WorkSchedule;
+use TheClinic\Visit\Utilities\ValidateTimeRanges;
 use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriod;
 use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriods;
 use TheClinicDataStructures\DataStructures\Time\DSDownTimes;
@@ -30,9 +29,7 @@ class WeeklyVisit implements IFindVisit
 
     private SearchingBetweenDownTimes $SearchingBetweenDownTimes;
 
-    private WorkSchedule $workSchedule;
-
-    private DownTime $downTime;
+    private ValidateTimeRanges $validateTimeRanges;
 
     private string $oldSort;
 
@@ -44,10 +41,8 @@ class WeeklyVisit implements IFindVisit
         DSDownTimes $dsDownTimes,
         null|\DateTime $startingPoint = null,
         null|SearchingBetweenDownTimes $SearchingBetweenDownTimes = null,
-        null|WorkSchedule $workSchedule = null,
-        null|DownTime $downTime = null,
+        null|ValidateTimeRanges $validateTimeRanges = null
     ) {
-        // $this->validateTimeRange($start, $end, $consumingTime);
         $this->dsWeekDaysPeriods = $dsWeekDaysPeriods;
         $this->consumingTime = $consumingTime;
 
@@ -60,8 +55,7 @@ class WeeklyVisit implements IFindVisit
 
         $this->startingPoint = $startingPoint ?: new \DateTime;
         $this->SearchingBetweenDownTimes = $SearchingBetweenDownTimes ?: new SearchingBetweenDownTimes;
-        $this->workSchedule = $workSchedule ?: new WorkSchedule;
-        $this->downTime = $downTime ?: new DownTime;
+        $this->validateTimeRanges = $validateTimeRanges ?: new ValidateTimeRanges;
     }
 
     public function findVisit(): int
@@ -120,7 +114,8 @@ class WeeklyVisit implements IFindVisit
     {
         /** @var DSDateTimePeriod $dsWeekDayPeriod */
         foreach ($dsWeekDayPeriods as $dsWeekDayPeriod) {
-            $this->validateTimeRange($dsWeekDayPeriod->getStart(), $dsWeekDayPeriod->getEnd(), $this->consumingTime);
+            $this->validateTimeRanges->checkConsumingTimeInTimeRange($dsWeekDayPeriod->getStartTimestamp(), $dsWeekDayPeriod->getEndTimestamp(), $this->consumingTime);
+            $this->validateTimeRanges->checkConsumingTimeInWorkSchedule($this->dsWorkSchedule, $this->consumingTime);
 
             return $this->iterateDSWorkSchedule($dsWeekDayPeriod, $weekDay);
         }
@@ -206,16 +201,6 @@ class WeeklyVisit implements IFindVisit
 
         while ($today->format('l') !== $weekDay) {
             $today->modify('+1 day');
-        }
-    }
-
-    private function validateTimeRange(\DateTime $start, \DateTime $end, int $consumingTime): void
-    {
-        if (
-            $end->getTimestamp() <= $start->getTimestamp() ||
-            ($end->getTimestamp() - $start->getTimestamp()) < $consumingTime
-        ) {
-            throw new NeededTimeOutOfRange();
         }
     }
 }

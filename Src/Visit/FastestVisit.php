@@ -8,11 +8,8 @@ use TheClinicDataStructures\DataStructures\Time\DSWorkSchedule;
 use TheClinic\Exceptions\Visit\NeededTimeOutOfRange;
 use TheClinic\Exceptions\Visit\VisitSearchFailure;
 use TheClinic\Visit\IFindVisit;
-use TheClinic\Visit\Utilities\DownTime;
-use TheClinic\Visit\Utilities\SearchBetweenTimestamps;
 use TheClinic\Visit\Utilities\SearchingBetweenDownTimes;
-use TheClinic\Visit\Utilities\SearchingBetweenTimeRange;
-use TheClinic\Visit\Utilities\WorkSchedule;
+use TheClinic\Visit\Utilities\ValidateTimeRanges;
 use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriod;
 use TheClinicDataStructures\DataStructures\Time\DSDateTimePeriods;
 
@@ -30,9 +27,7 @@ class FastestVisit implements IFindVisit
 
     private SearchingBetweenDownTimes $SearchingBetweenDownTimes;
 
-    private WorkSchedule $workSchedule;
-
-    private DownTime $downTime;
+    private ValidateTimeRanges $validateTimeRanges;
 
     private string $oldSort;
 
@@ -43,8 +38,7 @@ class FastestVisit implements IFindVisit
         DSWorkSchedule $dsWorkSchedule,
         DSDownTimes $dsDownTimes,
         null|SearchingBetweenDownTimes $SearchingBetweenDownTimes = null,
-        null|WorkSchedule $workSchedule = null,
-        null|DownTime $downTime = null
+        null|ValidateTimeRanges $validateTimeRanges = null
     ) {
         $this->pointer = $startPoint;
         $this->consumingTime = $consumingTime;
@@ -54,13 +48,12 @@ class FastestVisit implements IFindVisit
         $this->dsWorkSchedule = $dsWorkSchedule;
         $this->dsDownTimes = $dsDownTimes;
         $this->SearchingBetweenDownTimes = $SearchingBetweenDownTimes ?: new SearchingBetweenDownTimes();
-        $this->workSchedule = $workSchedule ?: new workSchedule;
-        $this->downTime = $downTime ?: new DownTime;
+        $this->validateTimeRanges = $validateTimeRanges ?: new ValidateTimeRanges;
     }
 
     public function findVisit(): int
     {
-        $this->checkConsumingTimeInWorkSchedule();
+        $this->validateTimeRanges->checkConsumingTimeInWorkSchedule($this->dsWorkSchedule, $this->consumingTime);
         $recursiveSafetyLimit = 0;
 
         while (!isset($timestamp) && $recursiveSafetyLimit < 500) {
@@ -117,27 +110,6 @@ class FastestVisit implements IFindVisit
             return $timestamp;
         } else {
             throw new \LogicException('Failed to find a visit time.', 500);
-        }
-    }
-
-    private function checkConsumingTimeInWorkSchedule(): void
-    {
-        $found = false;
-        /**
-         * @var string $weekDay
-         * @var DSDateTimePeriods $dsDateTimePeriods
-         */
-        foreach ($this->dsWorkSchedule as $weekDay => $dsDateTimePeriods) {
-            /** @var DSDateTimePeriod $dsDateTimePeriod */
-            foreach ($dsDateTimePeriods as $dsDateTimePeriod) {
-                if (($dsDateTimePeriod->getEndTimestamp() - $dsDateTimePeriod->getStartTimestamp()) >= $this->consumingTime) {
-                    $found = true;
-                }
-            }
-        }
-
-        if (!$found) {
-            throw new \RuntimeException('There is not enough time for this order in the given work schedule.', 500);
         }
     }
 }
