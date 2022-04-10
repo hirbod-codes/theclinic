@@ -76,9 +76,6 @@ class WeeklyVisit implements IFindVisit
             foreach ($this->dsWeekDaysPeriods as $weekDay => $dsWeekDayPeriods) {
                 $timestamp = $this->iterateDSWeekDayPeriods($dsWeekDayPeriods, $weekDay);
 
-                // For testing purposes
-                $timestampDT = (new \DateTime)->setTimestamp($timestamp);
-
                 if ((new \DateTime)->setTimestamp($timestamp)->format('l') !== $weekDay) {
                     throw new \LogicException('The founded visit time doesn\'t match with provided information.', 500);
                 }
@@ -98,6 +95,10 @@ class WeeklyVisit implements IFindVisit
      */
     private function findClosestTimestamp(array $timestamps): int
     {
+        if (empty($timestamps)) {
+            throw new \LogicException('Failed to find a visit time.', 500);
+        }
+
         $first = true;
         foreach ($timestamps as $timestamp) {
             if ($first) {
