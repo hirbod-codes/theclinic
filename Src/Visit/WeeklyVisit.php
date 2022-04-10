@@ -121,8 +121,12 @@ class WeeklyVisit implements IFindVisit
     {
         /** @var DSDateTimePeriod $dsWeekDayPeriod */
         foreach ($dsWeekDayPeriods as $dsWeekDayPeriod) {
-            $this->validateTimeRanges->checkConsumingTimeInTimeRange($dsWeekDayPeriod->getStartTimestamp(), $dsWeekDayPeriod->getEndTimestamp(), $this->consumingTime);
-            $this->validateTimeRanges->checkConsumingTimeInWorkSchedule($this->dsWorkSchedule, $this->consumingTime);
+            try {
+                $this->validateTimeRanges->checkConsumingTimeInTimeRange($dsWeekDayPeriod->getStartTimestamp(), $dsWeekDayPeriod->getEndTimestamp(), $this->consumingTime);
+                $this->validateTimeRanges->checkConsumingTimeInWorkSchedule($this->dsWorkSchedule, $this->consumingTime);
+            } catch (NeededTimeOutOfRange $th) {
+                continue;
+            }
 
             return $this->iterateDSWorkSchedule($dsWeekDayPeriod, $weekDay);
         }
