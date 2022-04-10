@@ -73,6 +73,8 @@ class WeeklyVisit implements IFindVisit
             foreach ($this->dsWeekDaysPeriods as $weekDay => $dsWeekDayPeriods) {
                 try {
                     $timestamp = $this->iterateDSWeekDayPeriods($dsWeekDayPeriods, $weekDay);
+                } catch (VisitSearchFailure $th) {
+                    continue;
                 } catch (NeededTimeOutOfRange $th) {
                     continue;
                 }
@@ -168,7 +170,7 @@ class WeeklyVisit implements IFindVisit
             $safety++;
         }
 
-        throw new \RuntimeException('Sefety limit reached, yet no visits has found!!!', 500);
+        throw new VisitSearchFailure('', 500);
     }
 
     private function searchInIntersection(DSDateTimePeriod $dsWorkSchedulePeriod, DSDateTimePeriod $dsWeekDayPeriod): int
