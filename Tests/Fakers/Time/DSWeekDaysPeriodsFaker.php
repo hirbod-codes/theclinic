@@ -8,9 +8,9 @@ use TheClinicDataStructures\DataStructures\Time\DSWeekDaysPeriods;
 
 class DSWeekDaysPeriodsFaker
 {
-    public function customFakeIt(array $data): DSWeekDaysPeriods
+    public function customFakeIt(array $data, string $startingDay = 'Monday'): DSWeekDaysPeriods
     {
-        $dsWeekDaysPeriods = new DSWeekDaysPeriods('Monday');
+        $dsWeekDaysPeriods = new DSWeekDaysPeriods($startingDay);
 
         $today = new \DateTime;
         foreach ($data as $weekDay => $periods) {
@@ -30,9 +30,9 @@ class DSWeekDaysPeriodsFaker
         return $dsWeekDaysPeriods;
     }
 
-    public function fakeIt(): DSWeekDaysPeriods
+    public function fakeIt(string $startingDay = 'Monday'): DSWeekDaysPeriods
     {
-        $dsWeekDaysPeriods = new DSWeekDaysPeriods('Monday');
+        $dsWeekDaysPeriods = new DSWeekDaysPeriods($startingDay);
 
         $today = new \DateTime;
         foreach (DSWeekDaysPeriods::$weekDays as $weekDay) {
