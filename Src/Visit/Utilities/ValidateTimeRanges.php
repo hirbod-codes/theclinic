@@ -9,6 +9,13 @@ use TheClinicDataStructures\DataStructures\Time\DSWorkSchedule;
 
 class ValidateTimeRanges
 {
+    /**
+     * @param DSWorkSchedule $dsWorkSchedule
+     * @param integer $consumingTime
+     * @return void
+     * 
+     * @throws NeededTimeOutOfRange
+     */
     public function checkConsumingTimeInWorkSchedule(DSWorkSchedule $dsWorkSchedule, int $consumingTime): void
     {
         $found = false;
@@ -31,6 +38,14 @@ class ValidateTimeRanges
         }
     }
 
+    /**
+     * @param integer $firstTS
+     * @param integer $lastTS
+     * @param integer $consumingTime
+     * @return void
+     * 
+     * @throws NeededTimeOutOfRange
+     */
     public function checkConsumingTimeInTimeRange(int $firstTS, int $lastTS, int $consumingTime): void
     {
         if (
