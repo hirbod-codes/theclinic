@@ -33,8 +33,6 @@ class WeeklyVisit implements IFindVisit
 
     private string $oldSort;
 
-    private bool $enoughTimeExists;
-
     public function __construct(
         DSWeekDaysPeriods $dsWeekDaysPeriods,
         int $consumingTime,
@@ -45,7 +43,6 @@ class WeeklyVisit implements IFindVisit
         null|SearchingBetweenDownTimes $SearchingBetweenDownTimes = null,
         null|ValidateTimeRanges $validateTimeRanges = null
     ) {
-        $this->enoughTimeExists = false;
         $this->dsWeekDaysPeriods = $dsWeekDaysPeriods;
         $this->consumingTime = $consumingTime;
 
@@ -64,29 +61,51 @@ class WeeklyVisit implements IFindVisit
     public function findVisit(): int
     {
         try {
+            $found = false;
             $timestamps = [];
 
-            /**
-             * @var DSDateTimePeriods $dsWeekDayPeriods 
-             * @var string $weekDay
-             */
-            foreach ($this->dsWeekDaysPeriods as $weekDay => $dsWeekDayPeriods) {
-                try {
-                    $timestamp = $this->iterateDSWeekDayPeriods($dsWeekDayPeriods, $weekDay);
-                } catch (VisitSearchFailure $th) {
-                    continue;
-                } catch (NeededTimeOutOfRange $th) {
+            foreach ($this->findIntersections($this->dsWeekDaysPeriods, $this->dsWorkSchedule, $this->consumingTime) as $previousBlock => $currentBlock) {
+                if (!is_int($currentBlock)) {
                     continue;
                 }
 
-                if ((new \DateTime)->setTimestamp($timestamp)->format('l') !== $weekDay) {
-                    throw new \LogicException('The founded visit time doesn\'t match with provided information.', 500);
+                try {
+                    $this->validateTimeRanges->checkConsumingTimeInTimeRange($previousBlock, $currentBlock, $this->consumingTime);
+                    $found = true;
+                } catch (NeededTimeOutOfRange $ntor) {
+                    continue;
+                }
+
+                $safety = 0;
+                while ($safety < 500) {
+                    try {
+                        $timestamp = $this->SearchingBetweenDownTimes->search(
+                            $previousBlock,
+                            $currentBlock,
+                            $this->futureVisits,
+                            $this->dsDownTimes,
+                            $this->consumingTime
+                        );
+
+                        if ($timestamp >= $this->startingPoint->getTimestamp()) {
+                            break;
+                        }
+                    } catch (VisitSearchFailure $vsf) {
+                    }
+
+                    $previousBlock = (new \DateTime)->setTimestamp($previousBlock)->modify('+7 days')->getTimestamp();
+                    $currentBlock = (new \DateTime)->setTimestamp($currentBlock)->modify('+7 days')->getTimestamp();
+                    $safety++;
                 }
 
                 $timestamps[] = $timestamp;
             }
 
-            return $timestamp = $this->findClosestTimestamp($timestamps);
+            if (!$found) {
+                throw new NeededTimeOutOfRange();
+            }
+
+            return $this->findClosestTimestamp($timestamps);
         } finally {
             $this->futureVisits->setSort($this->oldSort);
         }
@@ -98,10 +117,6 @@ class WeeklyVisit implements IFindVisit
      */
     private function findClosestTimestamp(array $timestamps): int
     {
-        if (!$this->enoughTimeExists) {
-            throw new NeededTimeOutOfRange('', 500);
-        }
-
         if (empty($timestamps)) {
             throw new \LogicException('Failed to find a visit time.', 500);
         }
@@ -123,94 +138,37 @@ class WeeklyVisit implements IFindVisit
         return $smallestTimestamp;
     }
 
-    private function iterateDSWeekDayPeriods(DSDateTimePeriods $dsWeekDayPeriods, string $weekDay): int
+    /**
+     * @param DSWeekDaysPeriods $firstWDP
+     * @param DSWeekDaysPeriods $secondWDP
+     * @return \Generator<int, int>|\Generator<int, NeededTimeOutOfRange>
+     */
+    public function findIntersections(DSWeekDaysPeriods $firstWDP, DSWeekDaysPeriods $secondWDP): \Generator
     {
-        /** @var DSDateTimePeriod $dsWeekDayPeriod */
-        foreach ($dsWeekDayPeriods as $dsWeekDayPeriod) {
-            $this->validateTimeRanges->checkConsumingTimeInTimeRange($dsWeekDayPeriod->getStartTimestamp(), $dsWeekDayPeriod->getEndTimestamp(), $this->consumingTime);
-            $this->validateTimeRanges->checkConsumingTimeInWorkSchedule($this->dsWorkSchedule, $this->consumingTime);
-
-            return $this->iterateDSWorkSchedule($dsWeekDayPeriod, $weekDay);
+        /**
+         * @var string $weekDay
+         * @var DSDateTimePeriods $firstDTPs
+         */
+        foreach ($firstWDP as $weekDay => $firstDTPs) {
+            yield from $this->walkDTPs($firstDTPs, $secondWDP[$weekDay], $weekDay);
         }
     }
 
-    private function iterateDSWorkSchedule(DSDateTimePeriod $dsWeekDayPeriod, string $weekDay): int
+    private function walkDTPs(DSDateTimePeriods $firstDTPs, DSDateTimePeriods $secondDTPs, string $weekDay): \Generator
     {
-        $today = (new \DateTime)->setTimestamp($this->startingPoint->getTimestamp());
+        $today = new \DateTime;
+        $today->setTimestamp($this->startingPoint->getTimestamp());
         $this->moveToWeekDay($today, $weekDay);
 
-        $safety = 0;
-        while (!isset($timestamp) && $safety < 500) {
-            $dsWeekDayPeriod->setDate($today);
-
-            /**
-             * @var DSDateTimePeriod $dsWorkSchedulePeriod
-             * @var DSDateTimePeriods $dsWorkSchedulePeriods
-             */
-            foreach ($dsWorkSchedulePeriods = $this->dsWorkSchedule[$weekDay] as $dsWorkSchedulePeriod) {
-                $dsWorkSchedulePeriod->setDate($today);
-
-                try {
-                    $timestamp = $this->searchInIntersection(
-                        $dsWorkSchedulePeriod,
-                        $dsWeekDayPeriod
-                    );
-
-                    if ($timestamp < $this->startingPoint->getTimestamp()) {
-                        throw new VisitSearchFailure('', 500);
-                    }
-
-                    return $timestamp;
-                } catch (VisitSearchFailure $th) {
-                } catch (NeededTimeOutOfRange $th) {
-                }
+        /** @var DSDateTimePeriod $firstDTP */
+        foreach ($firstDTPs as $firstDTP) {
+            $firstDTP->setDate($today);
+            /** @var DSDateTimePeriod $secondDTP */
+            foreach ($secondDTPs as $secondDTP) {
+                $secondDTP->setDate($today);
+                yield from $this->compareTwoDTP($firstDTP, $secondDTP);
             }
-
-            $today->modify('+7 days');
-            $safety++;
         }
-
-        throw new VisitSearchFailure('', 500);
-    }
-
-    private function searchInIntersection(DSDateTimePeriod $dsWorkSchedulePeriod, DSDateTimePeriod $dsWeekDayPeriod): int
-    {
-        if (
-            ($dsWeekDayPeriod->getStartTimestamp() < $dsWorkSchedulePeriod->getStartTimestamp() &&
-                $dsWeekDayPeriod->getEndTimestamp() <= $dsWorkSchedulePeriod->getStartTimestamp())
-            ||
-            ($dsWeekDayPeriod->getStartTimestamp() >= $dsWorkSchedulePeriod->getEndTimestamp() &&
-                $dsWeekDayPeriod->getEndTimestamp() > $dsWorkSchedulePeriod->getEndTimestamp())
-        ) {
-            throw new NeededTimeOutOfRange("", 1);
-        }
-
-        if ($dsWeekDayPeriod->getStartTimestamp() > $dsWorkSchedulePeriod->getStartTimestamp()) {
-            $previousBlock = $dsWeekDayPeriod->getStartTimestamp();
-        } else {
-            $previousBlock = $dsWorkSchedulePeriod->getStartTimestamp();
-        }
-
-        if ($dsWeekDayPeriod->getEndTimestamp() < $dsWorkSchedulePeriod->getEndTimestamp()) {
-            $currentBlock = $dsWeekDayPeriod->getEndTimestamp();
-        } else {
-            $currentBlock = $dsWorkSchedulePeriod->getEndTimestamp();
-        }
-
-        try {
-            $this->validateTimeRanges->checkConsumingTimeInTimeRange($previousBlock, $currentBlock, $this->consumingTime);
-            $this->enoughTimeExists = true;
-        } catch (NeededTimeOutOfRange $th) {
-            throw $th;
-        }
-
-        return $this->SearchingBetweenDownTimes->search(
-            $previousBlock,
-            $currentBlock,
-            $this->futureVisits,
-            $this->dsDownTimes,
-            $this->consumingTime
-        );
     }
 
     private function moveToWeekDay(\DateTime &$today, string $weekDay): void
@@ -222,5 +180,32 @@ class WeeklyVisit implements IFindVisit
         while ($today->format('l') !== $weekDay) {
             $today->modify('+1 day');
         }
+    }
+
+    private function compareTwoDTP(DSDateTimePeriod $firstDTP, DSDateTimePeriod $secondDTP): \Generator
+    {
+        if (
+            ($firstDTP->getStartTimestamp() < $secondDTP->getStartTimestamp() &&
+                $firstDTP->getEndTimestamp() <= $secondDTP->getStartTimestamp())
+            ||
+            ($firstDTP->getStartTimestamp() >= $secondDTP->getEndTimestamp() &&
+                $firstDTP->getEndTimestamp() > $secondDTP->getEndTimestamp())
+        ) {
+            return yield new NeededTimeOutOfRange("", 1);
+        }
+
+        if ($firstDTP->getStartTimestamp() > $secondDTP->getStartTimestamp()) {
+            $previousBlock = $firstDTP->getStartTimestamp();
+        } else {
+            $previousBlock = $secondDTP->getStartTimestamp();
+        }
+
+        if ($firstDTP->getEndTimestamp() < $secondDTP->getEndTimestamp()) {
+            $currentBlock = $firstDTP->getEndTimestamp();
+        } else {
+            $currentBlock = $secondDTP->getEndTimestamp();
+        }
+
+        yield $previousBlock => $currentBlock;
     }
 }
