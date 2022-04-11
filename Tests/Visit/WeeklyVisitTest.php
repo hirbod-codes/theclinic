@@ -43,27 +43,27 @@ class WeeklyVisitTest extends TestCase
             $ms = $t[0];
             $s = $t[1];
 
+            $testStartingTime = (new \DateTime("00:00:00"));
+
+            $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays, 3600, 1800);
+            $this->logDSDownTimes($dsDownTimes);
+
+            $dsWorkSchedule = $this->makeDSWorkSchedule();
+            $this->logDSWorkSchedule($dsWorkSchedule);
+
+            $dsWeekDaysPeriods = $this->makeDSWeekDaysPeriods([
+                'Monday' => [
+                    ['05:00:00', '07:00:00'],
+                    ['07:30:00', '09:00:00'],
+                ],
+                'Thursday' => [
+                    ['05:00:00', '07:00:00'],
+                    ['07:30:00', '09:00:00'],
+                ]
+            ], 'Monday');
+
             for ($i = 0; $i < $visitsCount; $i++) {
                 $consumingTime = round($this->faker->numberBetween(600, 3600), -2);
-
-                $testStartingTime = (new \DateTime("00:00:00"));
-
-                $dsWeekDaysPeriods = $this->makeDSWeekDaysPeriods([
-                    'Monday' => [
-                        ['05:00:00', '07:00:00'],
-                        ['07:30:00', '09:00:00'],
-                    ],
-                    'Thursday' => [
-                        ['05:00:00', '07:00:00'],
-                        ['07:30:00', '09:00:00'],
-                    ]
-                ]);
-
-                $dsDownTimes = $this->makeDSDowntimes($testStartingTime, $futureDays, 3600, 1800);
-                $this->logDSDownTimes($dsDownTimes);
-
-                $dsWorkSchedule = $this->makeDSWorkSchedule();
-                $this->logDSWorkSchedule($dsWorkSchedule);
 
                 $tt = explode(' ', microtime());
                 $tms = $tt[0];
@@ -101,15 +101,15 @@ class WeeklyVisitTest extends TestCase
                 ['04:00:00', '05:00:00'],
                 ['05:30:00', '07:00:00'],
             ]
-        ]);
+        ], $testStartingTime->format('l'));
 
-        $this->testFindVisit($testStartingTime, $dsWeekDaysPeriods, $testStartingTime->setTime(4, 0)->getTimestamp(), $consumingTime);
+        $this->testFindVisit($testStartingTime, $dsWeekDaysPeriods, (new \DateTime)->setTimestamp($testStartingTime->getTimestamp())->setTime(4, 0)->getTimestamp(), $consumingTime);
 
         $dsWeekDaysPeriods = $this->makeDSWeekDaysPeriods([
             $testStartingTime->format('l') => [
                 ['05:30:00', '07:00:00'],
             ]
-        ]);
+        ], $testStartingTime->format('l'));
 
         $this->testFindVisit($testStartingTime, $dsWeekDaysPeriods, $testStartingTime->setTime(5, 30)->getTimestamp(), $consumingTime);
 
@@ -117,7 +117,7 @@ class WeeklyVisitTest extends TestCase
             $testStartingTime->format('l') => [
                 ['08:00:00', '08:30:00'],
             ]
-        ]);
+        ], $testStartingTime->format('l'));
 
         $this->testFindVisit($testStartingTime, $dsWeekDaysPeriods, $testStartingTime->setTime(8, 0)->getTimestamp(), $consumingTime);
 
@@ -125,7 +125,7 @@ class WeeklyVisitTest extends TestCase
             $testStartingTime->format('l') => [
                 ['07:00:00', '08:30:00'],
             ]
-        ]);
+        ], $testStartingTime->format('l'));
 
         $this->testFindVisit($testStartingTime, $dsWeekDaysPeriods, $testStartingTime->setTime(8, 0)->getTimestamp(), $consumingTime);
     }
@@ -203,9 +203,9 @@ class WeeklyVisitTest extends TestCase
         return (new DSWorkScheduleFaker)->fakeIt();
     }
 
-    private function makeDSWeekDaysPeriods(array $data): DSWeekDaysPeriods
+    private function makeDSWeekDaysPeriods(array $data, string $startingDay): DSWeekDaysPeriods
     {
-        return (new DSWeekDaysPeriodsFaker)->customFakeIt($data);
+        return (new DSWeekDaysPeriodsFaker)->customFakeIt($data, $startingDay);
     }
 
     private function logVisit(DSVisit $dsVisit, int $consumingTime, int $i, float $time): void
