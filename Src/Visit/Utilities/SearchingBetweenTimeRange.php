@@ -36,6 +36,10 @@ class SearchingBetweenTimeRange
                 return $visit->getVisitTimestamp() + $visit->getConsumingTime();
             }
         ) as $array) {
+            if (!is_array($array)) {
+                continue;
+            }
+
             $previousBlock = $array[0];
             $currentBlock = $array[1];
 
