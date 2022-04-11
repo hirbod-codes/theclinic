@@ -13,6 +13,15 @@ class SearchBetweenTimestamps
         $this->validateTimeRanges = $validateTimeRanges ?: new ValidateTimeRanges;
     }
 
+    /**
+     * @param integer $startTS
+     * @param integer $endTS
+     * @param integer $neededTime
+     * @param \ArrayAccess|\Countable $arrayAccess
+     * @param array|\Closure $getItemStartTS
+     * @param array|\Closure $getItemEndTS
+     * @return \Generator<int, int[]>|\Generator<int, NeededTimeOutOfRange>
+     */
     public function search(int $startTS, int $endTS, int $neededTime, \ArrayAccess|\Countable $arrayAccess, array|\Closure $getItemStartTS, array|\Closure $getItemEndTS): \Generator
     {
         $this->validateArrayAccess($arrayAccess);
@@ -30,14 +39,18 @@ class SearchBetweenTimestamps
             $itemEndTS = call_user_func($getItemEndTS, $arrayAccess[$i]);
 
             if ($itemStartTS < $startTS && $itemEndTS > $endTS) {
-                throw new NeededTimeOutOfRange('', 500);
+                return yield new NeededTimeOutOfRange('', 500);
             }
 
             if ($itemEndTS <= $startTS) {
                 continue;
             } elseif ($itemStartTS <= $startTS) {
                 $startTS = $itemEndTS;
-                $this->validateTimeRanges->checkConsumingTimeInTimeRange($startTS, $endTS, $neededTime);
+                try {
+                    $this->validateTimeRanges->checkConsumingTimeInTimeRange($startTS, $endTS, $neededTime);
+                } catch (NeededTimeOutOfRange $th) {
+                    return yield $th;
+                }
                 continue;
             }
 
