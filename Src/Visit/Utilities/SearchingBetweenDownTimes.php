@@ -16,23 +16,23 @@ class SearchingBetweenDownTimes
 
     private DownTime $downTime;
 
+    private ValidateTimeRanges $validateTimeRanges;
+
     public function __construct(
         null|SearchBetweenTimestamps $searchBetweenTimestamps = null,
         null|SearchingBetweenTimeRange $searchingBetweenTimeRange = null,
-        null|DownTime $downTime = null
+        null|DownTime $downTime = null,
+        null|ValidateTimeRanges $validateTimeRanges = null
     ) {
         $this->searchBetweenTimestamps = $searchBetweenTimestamps ?: new SearchBetweenTimestamps;
         $this->searchingBetweenTimeRange = $searchingBetweenTimeRange ?: new SearchingBetweenTimeRange;
         $this->downTime = $downTime ?: new DownTime;
+        $this->validateTimeRanges = $validateTimeRanges ?: new ValidateTimeRanges;
     }
 
     public function search(int $firstTS, int $lastTS, DSVisits $futureVisits, DSDownTimes $dsDownTimes, int $consumingTime): int
     {
-        // For testing purposes
-        $firstDT = (new \DateTime)->setTimestamp($firstTS);
-        $lastDT = (new \DateTime)->setTimestamp($lastTS);
-
-        $this->validateTimeRange($firstTS, $lastTS, $consumingTime);
+        $this->validateTimeRanges->checkConsumingTimeInTimeRange($firstTS, $lastTS, $consumingTime);
 
         $intruptingDSDownTimes = $this->downTime->findDownTimeIntruptionWithTimeRange($firstTS, $lastTS, $dsDownTimes);
 
@@ -47,13 +47,13 @@ class SearchingBetweenDownTimes
             function (DSDownTime $dsDownTime): int {
                 return $dsDownTime->getEndTimestamp();
             }
-        ) as $array) {
-            $previousBlock = $array[0];
-            $currentBlock = $array[1];
+        ) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
 
-            // For testing purposes
-            $previousBlockDT = (new \DateTime)->setTimestamp($previousBlock);
-            $currentBlockDT = (new \DateTime)->setTimestamp($currentBlock);
+            $previousBlock = $item[0];
+            $currentBlock = $item[1];
 
             try {
                 return $this->searchingBetweenTimeRange->search($previousBlock, $currentBlock, $consumingTime, $futureVisits);
@@ -63,15 +63,5 @@ class SearchingBetweenDownTimes
         }
 
         throw new VisitSearchFailure("Failed to find a visit in the requested time range.", 500);
-    }
-
-    private function validateTimeRange(int $firstTS, int $lastTS, int $consumingTime): void
-    {
-        if ($firstTS >= $lastTS) {
-            throw new VisitSearchFailure("Failed to find a visit in requested time range.", 500);
-        }
-        if (($lastTS - $firstTS) < $consumingTime) {
-            throw new NeededTimeOutOfRange();
-        }
     }
 }
