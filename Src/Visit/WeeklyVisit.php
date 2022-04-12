@@ -58,6 +58,11 @@ class WeeklyVisit implements IFindVisit
         $this->validateTimeRanges = $validateTimeRanges ?: new ValidateTimeRanges;
     }
 
+    public function getDSWeekDaysPeriods(): DSWeekDaysPeriods
+    {
+        return $this->dsWeekDaysPeriods;
+    }
+
     public function findVisit(): int
     {
         try {
