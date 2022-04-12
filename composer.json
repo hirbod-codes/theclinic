@@ -16,7 +16,7 @@
     "require-dev": {
         "mockery/mockery": "dev-master",
         "fakerphp/faker": "^1.15",
-        "phpunit/phpunit": "9.5"
+        "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "psr-4": {
