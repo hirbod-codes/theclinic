@@ -56,19 +56,26 @@ class DSDownTimesFaker
     {
         $dsDownTimes = new DSDownTimes;
 
-        $date = (new \DateTime())->format("Y-m") . "-";
-        $today = intval((new \DateTime())->format("d"));
+        // $date = (new \DateTime())->format("Y-m") . "-";
+        // $today = intval((new \DateTime())->format("d"));
+        $pointer = new \DateTime("09:00:00");
 
         for ($i = 0; $i < 5; $i++) {
-            $start = new \DateTime($date . strval($today + $i) . "09:00:00");
-            $end = new \DateTime($date . strval($today + $i) . "12:00:00");
+            $start = (new \DateTime)->setTimestamp($pointer->getTimestamp());
+            $end = (new \DateTime)->setTimestamp($pointer->modify('+3 hours')->getTimestamp());
             $dsDownTime = new DSDownTime($start, $end, 'fake');
             $dsDownTimes[] = $dsDownTime;
 
-            $start = new \DateTime($date . strval($today + $i) . "17:00:00");
-            $end = new \DateTime($date . strval($today + $i) . "20:00:00");
+            $start = (new \DateTime)->setTimestamp($pointer->modify('+5 hours')->getTimestamp());
+            $end = (new \DateTime)->setTimestamp($pointer->modify('+3 hours')->getTimestamp());
             $dsDownTime = new DSDownTime($start, $end, 'fake');
             $dsDownTimes[] = $dsDownTime;
+
+            $pointer
+                ->setTime(9, 0)
+                ->modify('+1 day')
+                // 
+            ;
         }
 
         return $dsDownTimes;
