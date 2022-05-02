@@ -31,7 +31,7 @@ class TimeConsumptionCalculatorTest extends TestCase
     {
         $result = (new TimeConsumptionCalculator)->calculate($this->dsParts, $this->dsPackages);
 
-        $this->assertEquals(5400, $result);
+        $this->assertEquals(1800, $result);
     }
 
     private function makeParts(int $partsCount, string $gender, int $price, int $neededTime): array
