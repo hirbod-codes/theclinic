@@ -56,8 +56,6 @@ class DSDownTimesFaker
     {
         $dsDownTimes = new DSDownTimes;
 
-        // $date = (new \DateTime())->format("Y-m") . "-";
-        // $today = intval((new \DateTime())->format("d"));
         $pointer = new \DateTime("09:00:00");
 
         for ($i = 0; $i < 5; $i++) {
