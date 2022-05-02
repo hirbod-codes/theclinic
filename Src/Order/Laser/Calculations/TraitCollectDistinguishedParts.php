@@ -2,7 +2,9 @@
 
 namespace TheClinic\Order\Laser\Calculations;
 
+use TheClinicDataStructures\DataStructures\Order\DSPackage;
 use TheClinicDataStructures\DataStructures\Order\DSPackages;
+use TheClinicDataStructures\DataStructures\Order\DSPart;
 use TheClinicDataStructures\DataStructures\Order\DSParts;
 
 trait TraitCollectDistinguishedParts
@@ -15,34 +17,81 @@ trait TraitCollectDistinguishedParts
      * @param \TheClinicDataStructures\DataStructures\Order\DSPackages $packages
      * @return array
      */
-    private function collectDistinguishedParts(DSParts $parts, DSPackages $packages): array
+    private function collectDistinguishedParts(DSParts $dsParts, DSPackages $packages): array
     {
         $packagesParts = [];
+        $ids = $this->collectIdsFromDSParts($dsParts);
 
-        /** @var \TheClinicDataStructures\DataStructures\Order\DSPackage $package */
-        foreach ($packages as $package) {
-            /** @var \TheClinicDataStructures\DataStructures\Order\DSPart $packagePart */
-            foreach ($package->getParts() as $packagePart) {
-                $found = true;
-                /** @var \TheClinicDataStructures\DataStructures\Order\DSPart $part */
-                foreach ($parts as $part) {
-                    if ($part->getId() === $packagePart->getId()) {
-                        continue;
-                    }
+        /** @var DSPart $dsPackagePart */
+        foreach ($this->collectDSPartFromDSPackages($packages) as $dsPackagePart) {
+            if (empty($ids) || !in_array($dsPackagePart->getId(), $ids)) {
+                $packagesParts[] = $dsPackagePart;
+            }
+        }
 
-                    $found = false;
-                }
+        foreach ($dsParts as $dsPart) {
+            $packagesParts[] = $dsPart;
+        }
 
-                if (!$found) {
-                    $packagesParts[] = $packagePart;
+        return $packagesParts;
+    }
+
+    private function collectDSPartFromDSPackages(DSPackages $dsPackages): \Generator
+    {
+        /** @var DSPackage $dsPackage */
+        foreach ($dsPackages as $dsPackage) {
+            /** @var DSPart $dsPart */
+            foreach ($dsPackage->getParts() as $dsPart) {
+                yield $dsPart;
+            }
+        }
+    }
+
+    /**
+     * @param DSParts $dsParts
+     * @return int[]
+     */
+    private function collectIdsFromDSParts(DSParts $dsParts): array
+    {
+        $ids = [];
+        /** @var DSPart $dsPart */
+        foreach ($dsParts as $dsPart) {
+            $ids[] = $dsPart->getId();
+        }
+
+        return $ids;
+    }
+
+    private function collectPartsThatDontExistInPackages(DSParts $dsParts, DSPackages $dsPackages): array
+    {
+        $parts = [];
+
+        if (count($dsPackages) === 0) {
+            foreach ($dsParts as $dsPart) {
+                $parts[] = $dsPart;
+            }
+
+            return $parts;
+        }
+
+        /** @var DSPart $dsPart */
+        foreach ($dsParts as $dsPart) {
+            /** @var DSParts $dsParts */
+            foreach ($this->collectDSPartsFromDSPackages($dsPackages) as $dsParts) {
+                if (!in_array($dsPart->getId(), $this->collectIdsFromDSParts($dsParts))) {
+                    $parts[] = $dsPart;
                 }
             }
         }
 
-        foreach ($parts as $part) {
-            array_push($packagesParts, $part);
-        }
+        return $parts;
+    }
 
-        return $packagesParts;
+    private function collectDSPartsFromDSPackages(DSPackages $dsPackages): \Generator
+    {
+        /** @var DSPackage $dsPackage */
+        foreach ($dsPackages as $dsPackage) {
+            yield $dsPackage->getParts();
+        }
     }
 }
