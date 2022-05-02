@@ -29,23 +29,23 @@ class PriceCalculatorTest extends TestCase
 
         $gender = "Male";
 
-        $this->dsParts = (new DSPartsFaker($gender, $this->makeParts(3, $gender, 10, 600)))->fakeIt();
+        $this->dsParts = (new DSPartsFaker(gender: $gender, parts: $this->makeParts(3, $gender, 10, 600), partsCount: null))->fakeIt();
 
-        $this->dsPackages = (new DSPackagesFaker($gender, $this->makePackages(2, 3, $gender, 20, 10, 600)))->fakeIt();
+        $this->dsPackages = (new DSPackagesFaker(gender: $gender, packages: $this->makePackages(1, 2, $gender, 15, 10, 600), packagesCount: null))->fakeIt();
     }
 
     public function testCalculate(): void
     {
         $result = (new PriceCalculator)->calculate($this->dsParts, $this->dsPackages);
 
-        $this->assertEquals(70, $result);
+        $this->assertEquals(25, $result);
     }
 
     public function testCalculateWithoutDiscount(): void
     {
         $result = (new PriceCalculator)->calculateWithoutDiscount($this->dsParts, $this->dsPackages);
 
-        $this->assertEquals(90, $result);
+        $this->assertEquals(30, $result);
     }
 
     private function makeParts(int $partsCount, string $gender, int $price, int $neededTime): array
