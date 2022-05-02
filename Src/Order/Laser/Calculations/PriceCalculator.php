@@ -53,32 +53,4 @@ class PriceCalculator implements ILaserPriceCalculator
 
         return $price;
     }
-
-    private function collectPartsThatDontExistInPackages(DSParts $parts, DSPackages $packages): array
-    {
-        $distinguishedParts = [];
-
-        /** @var \TheClinicDataStructures\DataStructures\Order\DSPart $part */
-        foreach ($parts as $part) {
-            $found = true;
-
-            /** @var \TheClinicDataStructures\DataStructures\Order\DSPackage $package */
-            foreach ($packages as $package) {
-                /** @var \TheClinicDataStructures\DataStructures\Order\DSPart $packagePart */
-                foreach ($package->getParts() as $packagePart) {
-                    if ($part->getId() === $packagePart->getId()) {
-                        continue;
-                    }
-
-                    $found = false;
-                }
-            }
-
-            if (!$found) {
-                $distinguishedParts[] = $part;
-            }
-        }
-
-        return $distinguishedParts;
-    }
 }
