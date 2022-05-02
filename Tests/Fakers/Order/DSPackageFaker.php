@@ -52,13 +52,13 @@ class DSPackageFaker
     public function fakeIt(): DSPackage
     {
         return new DSPackage(
-            $this->id ?: $this->faker->numberBetween(1, 1000),
-            $this->name ?: $this->faker->lexify(),
-            $this->gender ?: ($this->gender = $this->faker->randomElement(["Female", "Male"])),
-            $this->price ?: $this->faker->numberBetween(6000000, 20000000),
-            $this->parts ?: (new DSPartsFaker($this->gender, null, $this->partsCount ?: $this->faker->numberBetween(1, 10)))->fakeIt(),
-            $this->createdAt ?: new \DateTime(),
-            $this->updatedAt ?: new \DateTime(),
+            $this->id !== null ? $this->id : $this->faker->numberBetween(1, 1000),
+            $this->name !== null ? $this->name : $this->faker->lexify(),
+            $this->gender !== null ? $this->gender : ($this->gender = $this->faker->randomElement(["Female", "Male"])),
+            $this->price !== null ? $this->price : $this->faker->numberBetween(6000000, 20000000),
+            $this->parts !== null ? $this->parts : (new DSPartsFaker($this->gender, null, $this->partsCount ?: $this->faker->numberBetween(1, 10)))->fakeIt(),
+            $this->createdAt !== null ? $this->createdAt : new \DateTime(),
+            $this->updatedAt !== null ? $this->updatedAt : new \DateTime(),
         );
     }
 }
