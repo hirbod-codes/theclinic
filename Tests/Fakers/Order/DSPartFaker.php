@@ -47,13 +47,13 @@ class DSPartFaker
     public function fakeIt(): DSPart
     {
         return new DSPart(
-            $this->id ?: $this->faker->numberBetween(1, 1000),
-            $this->name ?: $this->faker->lexify(),
-            $this->gender ?: $this->faker->randomElement(["Female", "Male"]),
-            $this->price ?: $this->faker->numberBetween(6000000, 20000000),
-            $this->neededTime ?: $this->faker->numberBetween(600, 3600),
-            $this->createdAt ?: new \DateTime(),
-            $this->updatedAt ?: new \DateTime(),
+            $this->id !== null ? $this->id : $this->faker->numberBetween(1, 1000),
+            $this->name !== null ? $this->name : $this->faker->lexify(),
+            $this->gender !== null ? $this->gender : $this->faker->randomElement(["Female", "Male"]),
+            $this->price !== null ? $this->price : $this->faker->numberBetween(6000000, 20000000),
+            $this->neededTime !== null ? $this->neededTime : $this->faker->numberBetween(600, 3600),
+            $this->createdAt !== null ? $this->createdAt : new \DateTime(),
+            $this->updatedAt !== null ? $this->updatedAt : new \DateTime(),
         );
     }
 }
