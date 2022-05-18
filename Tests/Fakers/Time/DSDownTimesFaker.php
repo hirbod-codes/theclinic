@@ -59,14 +59,16 @@ class DSDownTimesFaker
         $pointer = new \DateTime("09:00:00");
 
         for ($i = 0; $i < 5; $i++) {
+            $fakeName = 'fakeName_' . strval(microtime(true));
             $start = (new \DateTime)->setTimestamp($pointer->getTimestamp());
             $end = (new \DateTime)->setTimestamp($pointer->modify('+3 hours')->getTimestamp());
-            $dsDownTime = new DSDownTime($start, $end, 'fake');
+            $dsDownTime = new DSDownTime($start, $end, $fakeName . '_' . $i);
             $dsDownTimes[] = $dsDownTime;
 
+            $fakeName = 'fakeName_' . strval(microtime(true));
             $start = (new \DateTime)->setTimestamp($pointer->modify('+5 hours')->getTimestamp());
             $end = (new \DateTime)->setTimestamp($pointer->modify('+3 hours')->getTimestamp());
-            $dsDownTime = new DSDownTime($start, $end, 'fake');
+            $dsDownTime = new DSDownTime($start, $end, $fakeName . '_' . rand(100, 1000));
             $dsDownTimes[] = $dsDownTime;
 
             $pointer
