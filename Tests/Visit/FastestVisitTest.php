@@ -215,7 +215,7 @@ class FastestVisitTest extends TestCase
             }
             $end = (new \DateTime())->setTimestamp($start->getTimestamp())->modify("+" . $downTimeDurationSeconds . " seconds");
 
-            $customData[] = [$start, $end, $this->faker->lexify()];
+            $customData[] = [$start, $end, $this->faker->unique()->lexify()];
 
             $first = false;
         }
